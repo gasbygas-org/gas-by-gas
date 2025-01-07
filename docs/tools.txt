@@ -1,0 +1,6 @@
+back end: node js (express)
+front end: react js (vite)
+mobile: react native (expo)
+database: mysql
+styles: tailwind
+version control: git, github
