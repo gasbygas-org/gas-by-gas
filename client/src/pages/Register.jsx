@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { 
-  User, Mail, Lock, UserPlus, Building, Eye, EyeOff, 
-  AlertCircle, Phone, MapPin, ArrowRight, ArrowLeft, Shield,
-  Github, Facebook, Mail as Gmail
-} from 'lucide-react';
+  User, Mail, Lock, UserPlus, Eye, EyeOff, 
+  AlertCircle, Phone, MapPin, ArrowRight, ArrowLeft, Shield} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from 'firebase/auth';
 import { auth } from '../firebase.config';
