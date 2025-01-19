@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { m, AnimatePresence } from 'framer-motion';
 import { Suspense, lazy } from 'react';
 import { Loader2 } from 'lucide-react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useEffect, useState } from 'react';
+import { auth } from './firebase.config';
 
 // Components
 import Navbar from './components/Navbar';
@@ -28,6 +31,8 @@ const LoadingScreen = () => (
 );
 
 // Layout component to handle Navbar and Footer visibility
+import PropTypes from 'prop-types';
+
 const Layout = ({ children }) => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
@@ -39,6 +44,10 @@ const Layout = ({ children }) => {
       {isHomePage && <Footer />}
     </>
   );
+};
+
+Layout.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 // AnimatedRoutes component for page transitions
@@ -140,6 +149,16 @@ const AnimatedRoutes = () => {
 };
 
 const App = () => {
+
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <Router>
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-gray-100">

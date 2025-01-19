@@ -39,13 +39,37 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Remove autofill background */
+/* Enhanced autofill styles */
+@-webkit-keyframes autofill {
+  to {
+    background: rgba(17, 24, 39, 0.7);
+    color: rgb(229, 231, 235);
+  }
+}
+
+input:-webkit-autofill {
+  animation-name: autofill;
+  animation-fill-mode: both;
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px rgba(255, 255, 255, 0.05) inset !important;
-  -webkit-text-fill-color: white !important;
+  -webkit-box-shadow: 0 0 0 30px rgba(17, 24, 39, 0.7) inset !important;
+  -webkit-text-fill-color: rgb(229, 231, 235) !important;
+  caret-color: rgb(229, 231, 235) !important;
+  border-radius: 0.75rem;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Safari specific autofill styles */
+@media not all and (min-resolution:.001dpcm) { 
+  @supports (-webkit-appearance:none) {
+    input:-webkit-autofill {
+      background-color: rgba(17, 24, 39, 0.7) !important;
+    }
+  }
 }
 
 /* Glass effect base styles */
@@ -76,6 +100,7 @@ input:-webkit-autofill:active {
   transition: opacity 300ms, transform 300ms;
 }
 
+/* Enhanced gradient effects */
 .radial-gradient {
   background: radial-gradient(
     circle at center,
@@ -100,4 +125,21 @@ input:-webkit-autofill:active {
 .animate-gradient {
   animation: gradient 15s ease infinite;
   background-size: 400% 400%;
+}
+
+/* Form input focus styles */
+input:focus, 
+select:focus, 
+textarea:focus {
+  @apply ring-2 ring-blue-500/50 border-blue-500/50 outline-none;
+}
+
+/* Placeholder styles */
+::placeholder {
+  @apply text-gray-500;
+}
+
+/* Selection styles */
+::selection {
+  @apply bg-blue-500/30 text-white;
 }

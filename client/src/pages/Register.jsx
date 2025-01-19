@@ -1,16 +1,33 @@
-// src/components/Register.jsx
 import { useState } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { 
   User, Mail, Lock, UserPlus, Building, Eye, EyeOff, 
-  AlertCircle,
-  Phone, MapPin, ArrowRight, ArrowLeft, Shield 
+  AlertCircle, Phone, MapPin, ArrowRight, ArrowLeft, Shield,
+  Github, Facebook, Mail as Gmail
 } from 'lucide-react';
-//CheckCircle, Github, Facebook, Google,
-
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from 'firebase/auth';
+import { auth } from '../firebase.config';
 
 const Register = () => {
+  const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateStep(3) || !formData.agreeToTerms) {
+      setError('Please agree to the terms and conditions');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      navigate('/login');
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -27,6 +44,7 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [focusedInput, setFocusedInput] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -68,37 +86,45 @@ const Register = () => {
     }
   };
 
-  const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => prev + 1);
-      setError('');
+  const handleNext = async () => {
+    if (currentStep === 1) {
+      if (!validateStep(1)) return;
+      
+      setIsLoading(true);
+      try {
+        // Check if email exists before proceeding
+        const methods = await fetchSignInMethodsForEmail(auth, formData.email);
+        
+        if (methods.length > 0) {
+          setError('An account with this email already exists. Please login instead.');
+          setIsLoading(false);
+          return;
+        }
+        
+        // If email doesn't exist, proceed to next step
+        setCurrentStep(prev => prev + 1);
+        setError('');
+      } catch (error) {
+        if (error.code === 'auth/invalid-email') {
+          setError('Please enter a valid email address');
+        } else {
+          setError('An error occurred. Please try again.');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // For other steps, just validate and proceed
+      if (validateStep(currentStep)) {
+        setCurrentStep(prev => prev + 1);
+        setError('');
+      }
     }
   };
 
   const handleBack = () => {
     setCurrentStep(prev => prev - 1);
     setError('');
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateStep(currentStep)) return;
-    if (!formData.agreeToTerms) {
-      setError('Please agree to the Terms and Conditions');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Registration details:', formData);
-      // Handle successful registration
-    } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const renderStepContent = () => {
@@ -113,45 +139,60 @@ const Register = () => {
           >
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">Full Name</label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <div className="relative group">
+                <User className={`absolute left-3 top-3 w-5 h-5 transition-colors duration-200 
+                  ${focusedInput === 'name' ? 'text-blue-400' : 'text-gray-400'}`} />
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
+                  onFocus={() => setFocusedInput('name')}
+                  onBlur={() => setFocusedInput(null)}
                   placeholder="Enter your full name"
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 placeholder-gray-500"
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl 
+                    focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
+                    text-gray-200 placeholder-gray-500 transition-all duration-200"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <div className="relative group">
+                <Mail className={`absolute left-3 top-3 w-5 h-5 transition-colors duration-200 
+                  ${focusedInput === 'email' ? 'text-blue-400' : 'text-gray-400'}`} />
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
+                  onFocus={() => setFocusedInput('email')}
+                  onBlur={() => setFocusedInput(null)}
                   placeholder="Enter your email"
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 placeholder-gray-500"
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl 
+                    focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
+                    text-gray-200 placeholder-gray-500 transition-all duration-200"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">Phone Number</label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <div className="relative group">
+                <Phone className={`absolute left-3 top-3 w-5 h-5 transition-colors duration-200 
+                  ${focusedInput === 'phone' ? 'text-blue-400' : 'text-gray-400'}`} />
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
+                  onFocus={() => setFocusedInput('phone')}
+                  onBlur={() => setFocusedInput(null)}
                   placeholder="Enter your phone number"
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 placeholder-gray-500"
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl 
+                    focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
+                    text-gray-200 placeholder-gray-500 transition-all duration-200"
                 />
               </div>
             </div>
@@ -166,22 +207,27 @@ const Register = () => {
             exit={{ opacity: 0, x: -20 }}
             className="space-y-6"
           >
-            <div className="space-y-2">
+           <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <div className="relative group">
+                <Lock className={`absolute left-3 top-3 w-5 h-5 transition-colors duration-200
+                  ${focusedInput === 'password' ? 'text-blue-400' : 'text-gray-400'}`} />
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
+                  onFocus={() => setFocusedInput('password')}
+                  onBlur={() => setFocusedInput(null)}
                   placeholder="Create a password"
-                  className="w-full pl-10 pr-12 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 placeholder-gray-500"
+                  className="w-full pl-10 pr-12 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl 
+                    focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
+                    text-gray-200 placeholder-gray-500 transition-all duration-200"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-300"
+                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-300 transition-colors duration-200"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -190,20 +236,25 @@ const Register = () => {
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">Confirm Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <div className="relative group">
+                <Lock className={`absolute left-3 top-3 w-5 h-5 transition-colors duration-200
+                  ${focusedInput === 'password' ? 'text-blue-400' : 'text-gray-400'}`} />
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  onFocus={() => setFocusedInput('confirm password')}
+                  onBlur={() => setFocusedInput(null)}
                   placeholder="Confirm your password"
-                  className="w-full pl-10 pr-12 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 placeholder-gray-500"
+                  className="w-full pl-10 pr-12 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl 
+                    focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
+                    text-gray-200 placeholder-gray-500 transition-all duration-200"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-300"
+                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-300 transition-colors duration-200"
                 >
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -232,13 +283,16 @@ const Register = () => {
               >
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-300">User Type</label>
-                  <div className="relative">
-                    <Building className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                  <div className="relative group">
                     <select
                       name="userType"
                       value={formData.userType}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200"
+                      onFocus={() => setFocusedInput('userType')}
+                      onBlur={() => setFocusedInput(null)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl 
+                        focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
+                        text-gray-200 transition-all duration-200"
                     >
                       <option value="consumer">Consumer</option>
                       <option value="business">Business</option>
@@ -248,15 +302,17 @@ const Register = () => {
     
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-300">Address</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                  <div className="relative group">
+                    <MapPin className={`absolute left-3 top-3 w-5 h-5 transition-colors duration-200
+                      ${focusedInput === 'userType' ? 'text-blue-400' : 'text-gray-400'}`} />
                     <textarea
                       name="address"
                       value={formData.address}
                       onChange={handleChange}
                       placeholder="Enter your address"
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-200 placeholder-gray-500"
-                      rows="3"
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl 
+                        focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
+                        text-gray-200 transition-all duration-200"
                     />
                   </div>
                 </div>
@@ -284,14 +340,15 @@ const Register = () => {
       };
     
     return (
-    <m.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-h-screen flex items-center justify-center px-4 py-12 relative"
+      <m.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen flex items-center justify-center px-4 py-12 relative bg-gray-950"
     >
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
-        <div className="absolute inset-0 backdrop-blur-3xl" />
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 animate-gradient" />
+        <div className="absolute inset-0 backdrop-blur-xl backdrop-saturate-150" />
+      </div>
 
         <m.div
         initial={{ y: 20, opacity: 0 }}
@@ -404,4 +461,3 @@ const Register = () => {
 };
 
 export default Register;
-    
