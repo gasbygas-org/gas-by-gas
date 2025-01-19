@@ -46,19 +46,17 @@ const Navbar = () => {
           {/* Desktop Menu */}
           <ul className="hidden md:flex space-x-8">
             {menuItems.map((item) => (
-              <m.li
+              <li
                 key={item}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
               >
                 <Link 
                   to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
                   className="text-gray-300 hover:text-white transition-colors duration-300 relative group"
                 >
                   {item}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-500 transition-all duration-300 group-hover:w-full" />
+                  <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-500 transition-all duration-300 group-hover:w-full" />
                 </Link>
-              </m.li>
+              </li>
             ))}
           </ul>
 
