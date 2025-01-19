@@ -78,7 +78,7 @@ const Footer = () => {
           className="mt-8 pt-6 border-t border-gray-800/50 text-center"
         >
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} GasByGas. All rights reserved.
+            © {new Date().getFullYear()} GasByGas. All rights reserved. Made with ❤️ by{' කලු මල්ලි'} at Galle Fort
           </p>
         </m.div>
       </div>
