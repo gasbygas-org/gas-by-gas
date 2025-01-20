@@ -64,6 +64,27 @@ class UserRepository {
         const values = [roleId, nic, name, phone, email, password, address, uid];
         await this.db.query(userQuery, values);
     }
+    async getAdminsAndStockManagers(offset, limit) {
+        const query = `
+        SELECT u.id, u.name, u.email, r.role_name 
+        FROM users u
+        INNER JOIN roles r ON u.role_id = r.id
+        WHERE r.role_name IN ('admin', 'outletmanger')
+    `;
+
+        const countQuery = `
+        SELECT COUNT(*) AS totalCount 
+        FROM users u
+        INNER JOIN roles r ON u.role_id = r.id
+        WHERE r.role_name IN ('admin', 'outletmanger');
+    `;
+
+        const [users] = await this.db.query(query, [limit, offset]);
+        const [[{ totalCount }]] = await this.db.query(countQuery);
+
+        return { users, totalCount };
+    }
+
 }
 
 module.exports = UserRepository;
