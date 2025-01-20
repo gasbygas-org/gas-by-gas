@@ -4,6 +4,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 
 const authRoutes = require('./routes/authRoutes');
+const outletRoutes = require('./routes/outletRoutes');
+
 
 dotenv.config();
 
@@ -16,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/outlet', outletRoutes);
 
 // Error handling (always at the bottom)
 app.use((err, req, res, next) => {
