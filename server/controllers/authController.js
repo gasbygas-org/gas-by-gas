@@ -15,12 +15,32 @@ const transporter = createTransport({
 });
 
 exports.register = async (req, res) => {
-    const { email, password, name, role } = req.body;
+    const { email, password, name, role, nic, phone, address } = req.body;
 
     try {
         const validRoles = ['user', 'admin'];
         if (!validRoles.includes(role)) {
             return res.status(400).json({ message: 'Invalid role' });
+        }
+
+        const userRepository = new UserRepository(db);
+
+        const nicExists = await userRepository.nicExists(nic);
+        console.log(nicExists);
+        if (nicExists) {
+            return res.status(400).json({ message: `NIC '${nic}' is already in use.` });
+        }
+
+        const phoneExists = await userRepository.phoneExist(phone);
+        console.log(phoneExists);
+        if (phoneExists) {
+            return res.status(400).json({ message: `Phone number '${phone}' already exists.` });
+        }
+
+        const emailExists = await userRepository.emailExists(email);
+        console.log(emailExists);
+        if (emailExists) {
+            return res.status(400).json({ message: `Email '${email}' already exists.` });
         }
 
         const userRecord = await admin.auth().createUser({
@@ -33,21 +53,28 @@ exports.register = async (req, res) => {
             username: name,
             email: email,
             role: role,
+            nic: nic,
+            phone: phone,
+            address: address,
             createdAt: admin.firestore.FieldValue.serverTimestamp()
         };
 
         await firestore.collection('users').doc(userRecord.uid).set(userData);
 
-        const userRepository = new UserRepository(db);
         await userRepository.createUser({
             uid: userRecord.uid,
+            password: password,
+            nic: nic,
+            phone: phone,
             name,
             email,
+            address: address,
+            isVerified: true,
             role
         });
 
         const emailLink = await admin.auth().generateEmailVerificationLink(email, {
-            url: 'http://localhost:3000/login', // Front-end URL for redirection
+            url: 'http://localhost:3000/login',
             handleCodeInApp: true
         });
 
@@ -61,7 +88,11 @@ exports.register = async (req, res) => {
 
         console.log('Email Verification Link:', emailLink);
 
-        const jwtToken = jwt.sign({ uid: userRecord.uid, email, role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const jwtToken = jwt.sign(
+            { uid: userRecord.uid, email, role },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
 
         res.status(201).json({
             message: 'User registered successfully. Verification email sent.',
