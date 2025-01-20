@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes');
 const outletRoutes = require('./routes/outletRoutes');
 const rolesRoutes = require('./routes/rolesRoutes');
+const userAdminRoutes = require('./routes/userAdminRoutes');
 
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/outlet', outletRoutes);
 app.use('/api/roles', rolesRoutes);
+app.use('/api/user', userAdminRoutes);
 
 // Error handling (always at the bottom)
 app.use((err, req, res, next) => {
