@@ -52,6 +52,65 @@ class StockRepository {
 
         return { results, totalCount };
     }
+    async updateGasRequestStatus(requestId, status) {
+        const query = `
+            UPDATE outlet_requests
+            SET request_status = ?
+            WHERE id = ?;
+        `;
+
+        const [result] = await this.db.query(query, [status, requestId]);
+
+        if (result.affectedRows === 0) {
+            throw new Error("Gas request not found or already updated.");
+        }
+
+        return { requestId, status };
+    }
+    async getGasRequestById(requestId) {
+        const [result] = await this.db.query(
+            `SELECT ord.gas_type_id AS gasTypeId, ord.quantity
+        FROM outlet_requests AS outletRequest
+        INNER JOIN outlet_request_details AS ord
+            ON outletRequest.id = ord.outlet_request_id
+        WHERE outletRequest.id = ?`,
+            [requestId]
+        );
+        return result[0];  // Return the first result (as we're expecting only one row)
+    }
+
+
+
+    async updateRequestStatus(requestId, status) {
+        await this.db.query("UPDATE user_requests SET request_status = ? WHERE id = ?", [status, requestId]);
+    }
+
+    async reduceHeadOfficeStock(gasTypeId, quantity) {
+        await this.db.query(
+            "UPDATE head_office_stocks SET quantity = quantity - ? WHERE gas_type_id = ?",
+            [quantity, gasTypeId]
+        );
+    }
+
+    async getOutletManagers(outletId) {
+        const [results] = await this.db.query(
+            `SELECT u.email 
+        FROM users u 
+        INNER JOIN outlets o ON o.manager_id = u.id 
+        WHERE o.id = ?`,
+            [outletId]
+        );
+        return results;
+    }
+
+
+    async getPendingUsers(outletId) {
+        const [results] = await this.db.query(
+            "SELECT email FROM users WHERE id IN (SELECT user_id FROM user_requests WHERE outlet_id = ? AND request_status = 'Pending')",
+            [outletId]
+        );
+        return results;
+    }
 
 }
 module.exports = StockRepository;
