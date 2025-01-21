@@ -72,13 +72,13 @@ class StockRepository {
             `SELECT ord.gas_type_id AS gasTypeId, ord.quantity
         FROM outlet_requests AS outletRequest
         INNER JOIN outlet_request_details AS ord
-            ON outletRequest.id = ord.outlet_request_id
+                ON outletRequest.id = ord.outlet_request_id
         WHERE outletRequest.id = ?`,
             [requestId]
         );
         return result[0];  // Return the first result (as we're expecting only one row)
     }
-
+    
 
 
     async updateRequestStatus(requestId, status) {
@@ -111,6 +111,90 @@ class StockRepository {
         );
         return results;
     }
-
+    async getStockByOutletId(outletId) {
+        const [results] = await this.db.query(
+            "SELECT id FROM stocks WHERE outlet_id = ?",
+            [outletId]
+        );
+        return results[0];
+    }
+    async createStock(outletId) {
+        const [result] = await this.db.query(
+            "INSERT INTO stocks (outlet_id) VALUES (?)",
+            [outletId]
+        );
+        return result.insertId;
+    }
+    async getStockDetail(stockId, gasTypeId) {
+        const [results] = await this.db.query(
+            "SELECT id, quantity FROM stock_details WHERE stock_id = ? AND gas_type_id = ?",
+            [stockId, gasTypeId]
+        );
+        return results[0];
+    }
+    async createStockDetail(stockId, gasTypeId, quantity) {
+        await this.db.query(
+            "INSERT INTO stock_details (stock_id, gas_type_id, quantity) VALUES (?, ?, ?)",
+            [stockId, gasTypeId, quantity]
+        );
+    }
+    async updateStockDetailQuantity(stockId, gasTypeId, quantity) {
+        await this.db.query(
+            "UPDATE stock_details SET quantity = quantity + ? WHERE stock_id = ? AND gas_type_id = ?",
+            [quantity, stockId, gasTypeId]
+        );
+    }
+    async updateRequestStatus(requestId, status) {
+        await this.db.query(
+            "UPDATE outlet_requests SET request_status = ? WHERE id = ?",
+            [status, requestId]
+        );
+    }
+    async createDelivery(outletId, requestId, status) {
+        const [result] = await this.db.query(
+            `INSERT INTO deliveries (outlet_id, request_id, delivery_date, status) VALUES (?, ?, CURDATE(), ?)`,
+            [outletId, requestId, status]
+        );
+        return result.insertId;
+    }
+    
+    async createDeliveryDetail(deliveryId, gasTypeId, quantity) {
+        await this.db.query(
+            `INSERT INTO delivery_details (delivery_id, gas_type_id, quantity) VALUES (?, ?, ?)`,
+            [deliveryId, gasTypeId, quantity]
+        );
+    }
+    async getGasRequestDetailsByRequestId(requestId) {
+        const [result] = await this.db.query(
+            `SELECT 
+                d.outlet_id AS outletId,
+                dd.gas_type_id AS gasTypeId,
+                dd.quantity AS quantity
+             FROM 
+                deliveries AS d
+             INNER JOIN 
+                delivery_details AS dd
+                ON d.id = dd.delivery_id
+             WHERE 
+                d.request_id = ?`,
+            [requestId]
+        );
+        
+        if (result.length > 0) {
+            return result[0]; 
+        } else {
+            return null;
+        }
+    }
+    async updateDeliveryStatus(requestId, status) {
+        const [result] = await this.db.query(
+            `UPDATE deliveries 
+             SET status = ? 
+             WHERE request_id = ?`,
+            [status, requestId]
+        );
+        return result.affectedRows > 0;
+    }
+      
 }
 module.exports = StockRepository;
