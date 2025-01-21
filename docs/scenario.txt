@@ -1,0 +1,58 @@
+1.	Description and requirements:
+    You are required to produce a solution using appropriate approach to analyse, design, implement and test the software for the scenario described below:
+
+Scenario
+    GasByGas is a LP gas cylinder distributor establish in Sri Lanka where they provide gas distribution island wide. They have several registered outlet shops service centers at all districts. GasByGaswishestointroduceanOnlinegasrequestinganddeliveringsystemfortherequirement of gas distribution and tracking. End consumers are to be given facilities to request a gas from an outlet and obtain a token with expected pickup period with two weeks of tolerance. If the gas distribution cannot make available the requested gas at the outlet within the period given a new scheduled period will be issued. If there is no any scheduled delivery to a particular outlet or scheduled gas stock finished, the necessary message will be given and requests are not permitted. Once the delivery schedule to the given outlet is confirmed by the dispatch office in the head office, notification SMS/email will be sent to all token holders to handover empty cylinders and the money for the requested gas. If the customer unable to satisfy the handing over within the given date, outlet manager can reallocate it to another customer after communicating the decision to the customer through email/sms or phone call. End consumers can take a token from the gas outlet also using the same system when scheduled delivery is available. On the day before the dateofdeliverytotheoutlet,endconsumerswillreceivesms/emailtoreceivethecylinder.System will  be  able  to  limit  request  based  on  the  personal  identity  which  coupled  with  the NIC/Phone/email etc. The outlet requests are to be taken separately using the system. Gas for the industries and business organizations need to have a separate category of request upon registration and validation with the certification of the organization.
+
+You are required to design a web and mobile apps to achieve above objectives. High-level system requirement as follows.
+    1.   System has two components
+        a.   Web server with the database.
+        b.   Client web Application with the Database Server.
+        c.   Mobile app can use the same application services provided by the server (Data operations).
+    2.   The consumers should be able to register in the system and multiple registrations per identity should be prevented.
+    3.   Outlet manager should be able to verify the tokens and details of the consumers/customers.
+    4.   Outlet manager should be able to mark the status of the requests upon receiving empties and payments.
+    5.   Based on the distribution of gas for the outlets, head office should be able to view the status of each outlet.
+
+By considering the brief outline requirement given above, the hidden and potential requirements are to be derived by you for the purpose and mention those clearly. The hidden requirements are to be logically match with the outline requirement given above.
+
+Note
+    The security mechanisms are considered as Top priority in this application system.
+
+Group Tasks (55%):
+    1.   System architecturedesignwith thecommunicationDiagram.
+    2.   Software requirements specification should clearly indicate the Potential requirements and the hidden requirements (including required reports). Obtaining awareness about travel reservation mechanisms would be highly important.
+    3.   Software design and its specification using UML with Object Oriented Analysis Design techniques.
+    4.   Use  of  collaborative  software  tools  and  groupware  for  the  development  is  highly encouraged.
+
+Individual Task (45%):
+    1.   Each member of the group must implement a part (more than two components) of the software, such as interface including login function, daily report software.
+    2.   Each member of the group must test your implemented software. It includes software-testing design (With Test cases), test implementation and test report.
+    3.   Each member should demonstrate his/her contribution inside the collaborative software development tools (Git, Test management software like JIRA, Google cloud software etc.).
+
+This coursework also requires each group to give a group presentation in week 10 and an individual presentation in week 17. The requirements for presentation have been included in the Marking Scheme.
+
+2.	Submission:
+    By the deadline you must submit an electronic version and the hardcopy of the complete documentation and software.
+
+3.	Marking Scheme (TOTAL 100 MARKS):
+    The marks for this assessment are based on the following assessment criteria:
+
+Items (Max. Mark)
+    Over all report including report title, abstract, content and page number, etc (6 %)
+    Group presentation in week 10 (10 %)
+        At least it contains project planning, requirement and design specifications. It needs PowerPoint slides. Use of collaborative tools should be demonstrated.
+    System architecture design (8%)
+    Requirements specification (15 %)
+        User stories, Functional, non-functional, hidden requirements, potential requirements etc. (Use of standard template)
+    Design specification (16 %)
+        Use of UML, OOAD, etc. (Use cases, EER diagrams, Class diagrams, Sequence diagrams/ Activity diagrams, pseudocodes / flow charts etc.)
+    Implementation (20 %)
+        Use any programming/ Database / web language of your choice. Use of collaborative tools and automation tools and libraries.
+    Testing (15 %)
+        Software-testing design (With Test cases), test implementation and test report., plus evidence of the testing with prepared test data as specified in the requirements specification. Use of automated testing and test management tools.
+    Individual Presentation of the project report (10 %)
+        The contents of your presentation should be the work done by yourself.
+Total (100%)
+
+THIS COURSEWORK HAS TO BE COMPLETED IN GROUPS OF THREE TO FOUR STUDENTS.
