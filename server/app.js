@@ -8,6 +8,7 @@ const outletRoutes = require('./routes/outletRoutes');
 const rolesRoutes = require('./routes/rolesRoutes');
 const userAdminRoutes = require('./routes/userAdminRoutes');
 const stocksRoutes = require('./routes/stockRoutes');
+const requestGasRoutes = require('./routes/userRequestRoutes');
 
 
 dotenv.config();
@@ -24,7 +25,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/outlet', outletRoutes);
 app.use('/api/roles', rolesRoutes);
 app.use('/api/user', userAdminRoutes);
-app.use('/api/stock', stocksRoutes);
+app.use('/api/stock',stocksRoutes);
+app.use('/api/request',requestGasRoutes);
 
 // Error handling (always at the bottom)
 app.use((err, req, res, next) => {
