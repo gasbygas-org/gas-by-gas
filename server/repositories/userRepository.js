@@ -84,6 +84,10 @@ class UserRepository {
 
         return { users, totalCount };
     }
+    async getUserById(userId) {
+        const [result] = await this.db.execute('SELECT id, email FROM users WHERE id = ?', [userId]);
+        return result[0]; 
+    }
 
 }
 
