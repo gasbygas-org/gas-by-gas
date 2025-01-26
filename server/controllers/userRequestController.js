@@ -100,3 +100,91 @@ exports.requestGas = async (req, res) => {
         });
     }
 };
+exports.approveRequest = async (req, res) => {
+    const { requestId } = req.body;
+
+    if (!requestId) {
+        return res.status(400).json({ message: "Request ID is required." });
+    }
+
+    try {
+        // Fetch the user request details
+        const userRequest = await userRequestRepository.getUserRequestById(requestId);
+        if (!userRequest) {
+            return res.status(404).json({ message: "User request not found." });
+        }
+
+        if (userRequest.request_status !== 'Pending') {
+            return res.status(400).json({ message: "User request is not in a pending state." });
+        }
+
+        const { outlet_id, user_id, gas_type_id, quantity } = userRequest;
+
+        // Fetch user details for email
+        const user = await userRepository.getUserById(user_id);
+        if (!user || !user.email) {
+            return res.status(404).json({ message: "User not found or email not available." });
+        }
+        const email = user.email;
+        console.log("User email:", email);
+
+        // Check outlet gas stock
+        const outletStock = await userRequestRepository.getOutletStock(outlet_id, gas_type_id);
+
+        if (outletStock >= quantity) {
+            // Enough stock: Approve and mark as delivered
+            await userRequestRepository.updateUserRequestStatus(requestId, 'Delivered');
+            await userRequestRepository.updateOutletStock(outlet_id, gas_type_id, quantity);
+
+            await transporter.sendMail({
+                from: '"Bodo App" <3treecrops2@gmail.com>',
+                to: email,
+                subject: 'Gas Request Approved and Delivered',
+                html: `
+                    <h1>Your Gas Request Has Been Delivered</h1>
+                    <p>Your gas request for ${quantity} units has been successfully delivered.</p>
+                    <p>Thank you for using our service!</p>
+                    <p>If you have any questions, contact support at <a href="mailto:3treecrops2@gmail.com">3treecrops2@gmail.com</a>.</p>
+                `,
+            });
+
+            return res.status(200).json({ message: "User request approved and delivered successfully." });
+        } else {
+            // Not enough stock: Notify the user to wait
+            await userRequestRepository.updateUserRequestStatus(requestId, 'Approved');
+
+            const notificationMessage = `
+                Your gas request has been approved. The outlet is awaiting new stock. 
+                You will be notified one day before the stock is dispatched.
+            `;
+            //await userRequestRepository.createNotification(userId, notificationMessage);
+
+            // Send email notification
+            await transporter.sendMail({
+                from: '"Bodo App" <3treecrops2@gmail.com>',
+                to: email,
+                subject: 'Gas Request Approved - Awaiting Stock',
+                html: `
+                    <h1>Your Gas Request Has Been Approved</h1>
+                    <p>Your request for ${quantity} units of gas has been approved. 
+                    However, the outlet is currently awaiting new stock.</p>
+                    <p>You will receive a notification one day before the stock is dispatched.</p>
+                    <p>Thank you for your patience!</p>
+                    <p>If you have any questions, contact support at <a href="mailto:3treecrops2@gmail.com">3treecrops2@gmail.com</a>.</p>
+                `,
+            });
+
+            return res.status(200).json({
+                message: "User request approved. Awaiting new stock.",
+                notification: notificationMessage,
+            });
+        }
+    } catch (error) {
+        console.error("Error approving user request:", error);
+        return res.status(500).json({
+            message: "An error occurred while approving the user request.",
+            error: error.message,
+        });
+    }
+};
+

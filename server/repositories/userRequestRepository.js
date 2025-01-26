@@ -3,6 +3,7 @@ class UserRequestRepository {
     constructor(db) {
         this.db = db;
     }
+    // Get outlet gas availability
     async getOutletGasAvailability(outletId, gasTypeId) {
         const [result] = await db.query(
             `SELECT stock_details.quantity AS stockQuantity
@@ -14,7 +15,7 @@ class UserRequestRepository {
         return result[0]; 
     }
     
-
+// Get scheduled delivery for a specific outlet and gas type
     async getScheduledDelivery(outletId, gasTypeId) {
         const [result] = await db.query(
             `SELECT d.id AS deliveryId, dd.quantity AS deliveryQuantity
@@ -25,6 +26,7 @@ class UserRequestRepository {
         );
         return result[0]; 
     }
+    // Create a user request
     async createUserRequest({ userId, outletId, gasTypeId, quantity, token, deliveryDate, pickupPeriodStart, pickupPeriodEnd }) {
         const [result] = await db.query(
             `INSERT INTO user_requests 
@@ -34,6 +36,7 @@ class UserRequestRepository {
         );
         return result.insertId;
     }
+    // Get pending user requests for a specific outlet and gas type
     async getPendingUserRequests(outletId, gasTypeId) {
         try {
             const query = `
@@ -48,6 +51,60 @@ class UserRequestRepository {
             console.error("Error fetching pending user requests:", error);
             throw new Error("Unable to fetch pending user requests.");
         }
+    }
+    // Get user request by ID
+    async getUserRequestById(requestId) {
+        const query = `
+            SELECT outlet_id, user_id, gas_type_id, quantity, request_status
+            FROM user_requests
+            WHERE id = ?
+        `;
+        const [rows] = await db.execute(query, [requestId]);
+        return rows[0] || null;
+    }
+
+    // Get outlet stock for a specific gas type
+    async getOutletStock(outletId, gasTypeId) {
+    const query = `
+        SELECT sd.quantity
+        FROM stocks s
+        INNER JOIN stock_details sd ON s.id = sd.stock_id
+        WHERE s.outlet_id = ? AND sd.gas_type_id = ?
+    `;
+    const [rows] = await db.execute(query, [outletId, gasTypeId]);
+    return rows[0]?.quantity || 0;
+}
+
+
+    // Update user request status
+    async updateUserRequestStatus(requestId, status) {
+        const query = `
+            UPDATE user_requests
+            SET request_status = ?
+            WHERE id = ?
+        `;
+        await db.execute(query, [status, requestId]);
+    }
+
+    // Update outlet stock by reducing the quantity
+    async updateOutletStock(outletId, gasTypeId, quantity) {
+    const query = `
+        UPDATE stock_details sd
+        INNER JOIN stocks s ON s.id = sd.stock_id
+        SET sd.quantity = sd.quantity - ?
+        WHERE s.outlet_id = ? AND sd.gas_type_id = ?
+    `;
+    await db.execute(query, [quantity, outletId, gasTypeId]);
+}
+
+
+    // Create a notification for the user
+    async createNotification(userId, message) {
+        const query = `
+            INSERT INTO Notifications (userId, message, timestamp)
+            VALUES (?, ?, NOW())
+        `;
+        await db.execute(query, [userId, message]);
     }
 }
 
