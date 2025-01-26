@@ -34,6 +34,21 @@ class UserRequestRepository {
         );
         return result.insertId;
     }
+    async getPendingUserRequests(outletId, gasTypeId) {
+        try {
+            const query = `
+                SELECT quantity
+                FROM user_requests
+                WHERE outlet_id = ? AND gas_type_id = ? AND request_status = 'pending'
+            `;
+
+            const [rows] = await this.db.execute(query, [outletId, gasTypeId]);
+            return rows; // Each row will have the quantity of a pending request
+        } catch (error) {
+            console.error("Error fetching pending user requests:", error);
+            throw new Error("Unable to fetch pending user requests.");
+        }
+    }
 }
 
 module.exports = UserRequestRepository;
