@@ -6,7 +6,9 @@ export default {
             "expo-secure-store",
         ],
         extra: {
-            apiBaseUrl: process.env.API_BASE_URL,
+            serverUrl: process.env.SERVER_URL,
+            clientUrl: process.env.CLIENT_URL,
+            mobileUrl: process.env.MOBILE_URL,
         },
     },
 };
