@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text } from 'react-native';
-import { login } from '../../services/auth';
+import { signin } from '../../services/auth';
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
@@ -13,9 +13,10 @@ const LoginScreen = ({ navigation }) => {
             return;
         }
 
-        const result = await login({ email, password });
-        if (result.token) {
-            navigation.navigate('App');
+        const result = await signin({ email, password });
+
+        if (result) {
+            navigation.navigate('Profile');
         } else {
             setErrorMessage('Login failed. Please check your credentials.');
         }
@@ -35,13 +36,12 @@ const LoginScreen = ({ navigation }) => {
                 secureTextEntry
                 placeholder="Password"
             />
-    <Button onPress={handleSubmit} title="Login" />
-    <Text style={{ marginVertical: 10 }}>
-        <Text style={{ color: 'blue' }} onPress={() => {/* forgot password logic */}}>
-            Forgot Password?
-        </Text>
-    </Text>
-
+            <Button onPress={handleSubmit} title="Login" />
+            <Text style={{ marginVertical: 10 }}>
+                <Text style={{ color: 'blue' }} onPress={() => {/* forgot password logic */ }}>
+                    Forgot Password?
+                </Text>
+            </Text>
         </View>
     );
 };
