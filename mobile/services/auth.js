@@ -1,6 +1,7 @@
+import Constants from 'expo-constants';
 import { AsyncStorage } from 'react-native';
 
-const API_URL = 'https://your-api-url.com';
+const SERVER_URL = Constants.expoConfig.extra.serverUrl;
 
 export const getAuthToken = async () => {
   try {
@@ -14,7 +15,7 @@ export const getAuthToken = async () => {
 
 export const setAuthToken = async (credentials) => {
   try {
-    const response = await fetch(`${API_URL}/login`, {
+    const response = await fetch(`${SERVER_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -37,7 +38,7 @@ export const setAuthToken = async (credentials) => {
 
 export const signup = async (credentials) => {
   try {
-    const response = await fetch(`${API_URL}/signup`, {
+    const response = await fetch(`${SERVER_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
