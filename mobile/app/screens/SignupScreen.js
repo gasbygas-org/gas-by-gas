@@ -28,7 +28,7 @@ const SignupScreen = ({ navigation }) => {
         const result = await signup({ email, password, phone, nic, name, address, role });
 
         if (result.token) {
-            navigation.navigate('App');
+            navigation.navigate('Login');
         } else {
             setErrorMessage('Signup failed. Please try again.');
         }
