@@ -240,5 +240,93 @@ exports.markAsDelivered = async (req, res) => {
         });
     }
 };
+exports.getUserRequests = async (req, res) => {
+    const { page = 1, pageSize = 10, requestStatus, outletId, search } = req.query;
 
+    const pageNumber = parseInt(page, 10);
+    const limit = parseInt(pageSize, 10);
 
+    if (pageNumber < 1 || limit < 1) {
+        return res.status(400).json({ message: "Invalid page or pageSize parameters." });
+    }
+
+    try {
+        const offset = (pageNumber - 1) * limit;
+
+        // Initialize query filters and parameters
+        const filters = [];
+        const queryParams = [];
+
+        if (requestStatus) {
+            filters.push(`ur.request_status = ?`);
+            queryParams.push(requestStatus);
+        }
+
+        if (outletId) {
+            filters.push(`ur.outlet_id = ?`);
+            queryParams.push(outletId);
+        }
+
+        if (search) {
+            filters.push(`(users.email LIKE ? OR users.nic LIKE ?)`);
+            queryParams.push(`%${search}%`, `%${search}%`);
+        }
+
+        // Construct the WHERE clause dynamically
+        const whereClause = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
+
+        const query = `
+            SELECT 
+                ur.id, ur.user_id, ur.outlet_id, ur.gas_type_id, ur.quantity, ur.request_status,
+                ur.created_at, ur.token, ur.delivery_date, ur.pickup_period_start, ur.pickup_period_end,
+                users.email AS user_email, users.nic AS user_nic
+            FROM user_requests ur
+            INNER JOIN users ON ur.user_id = users.id
+            ${whereClause}
+            LIMIT ? OFFSET ?
+        `;
+        queryParams.push(limit, offset);
+
+        // Execute the main query
+        const [userRequests] = await db.query(query, queryParams);
+
+        // Transform buffer data, if any
+        const transformedRequests = userRequests.map((request) => {
+            const transformedRequest = {};
+            for (const [key, value] of Object.entries(request)) {
+                if (Buffer.isBuffer(value)) {
+                    transformedRequest[key] = value.toString("utf-8");
+                } else {
+                    transformedRequest[key] = value;
+                }
+            }
+            return transformedRequest;
+        });
+
+        // Query to fetch total count of user requests
+        const countQuery = `
+            SELECT COUNT(*) AS total
+            FROM user_requests ur
+            INNER JOIN users ON ur.user_id = users.id
+            ${whereClause}
+        `;
+        const [countResult] = await db.query(countQuery, queryParams.slice(0, queryParams.length - 2));
+        const totalCount = countResult[0]?.total || 0;
+
+        return res.status(200).json({
+            data: transformedRequests,
+            pagination: {
+                currentPage: pageNumber,
+                pageSize: limit,
+                totalPages: Math.ceil(totalCount / limit),
+                totalRecords: totalCount,
+            },
+        });
+    } catch (error) {
+        console.error("Error fetching user requests:", error);
+        return res.status(500).json({
+            message: "An error occurred while fetching user requests.",
+            error: error.message,
+        });
+    }
+};
