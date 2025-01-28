@@ -187,4 +187,58 @@ exports.approveRequest = async (req, res) => {
         });
     }
 };
+exports.markAsDelivered = async (req, res) => {
+    const { requestId } = req.body;
+
+    if (!requestId) {
+        return res.status(400).json({ message: "Request ID is required." });
+    }
+
+    try {
+        const userRequest = await userRequestRepository.getUserRequestById(requestId);
+        if (!userRequest) {
+            return res.status(404).json({ message: "User request not found." });
+        }
+
+        const { user_id, outlet_id, gas_type_id, quantity, request_status } = userRequest;
+
+        if (request_status !== 'Approved') {
+            return res.status(400).json({ message: "Only approved requests can be marked as delivered." });
+        }
+
+        const user = await userRepository.getUserById(user_id);
+        if (!user || !user.email) {
+            return res.status(404).json({ message: "User not found or email not available." });
+        }
+
+        const outletStock = await userRequestRepository.getOutletStock(outlet_id, gas_type_id);
+        if (outletStock < quantity) {
+            return res.status(400).json({ message: "Insufficient stock to mark request as delivered." });
+        }
+
+        await userRequestRepository.updateUserRequestStatus(requestId, 'Delivered');
+        await userRequestRepository.updateOutletStock(outlet_id, gas_type_id, -quantity);
+
+        await transporter.sendMail({
+            from: '"Bodo App" <3treecrops2@gmail.com>',
+            to: email,
+            subject: 'Gas Request Dilivered',
+            html: `
+                <h1>Your Gas Request Has Been Delivered</h1>
+                <p>Your request for ${quantity} units of gas has been successfully delivered.</p>
+                <p>Thank you for using our service!</p>
+                <p>If you have any questions, contact support at <a href="mailto:3treecrops2@gmail.com">3treecrops2@gmail.com</a>.</p>
+            `,
+        });
+
+        return res.status(200).json({ message: "Request marked as delivered and stock updated successfully." });
+    } catch (error) {
+        console.error("Error marking request as delivered:", error);
+        return res.status(500).json({
+            message: "An error occurred while processing the delivery request.",
+            error: error.message,
+        });
+    }
+};
+
 
