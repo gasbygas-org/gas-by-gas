@@ -44,7 +44,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="relative overflow-hidden min-h-screen">
+    <div className="relative overflow-hidden min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Enhanced Background Effects */}
       <div className="absolute inset-0">
         {/* Primary gradient background */}
@@ -78,12 +78,11 @@ const Hero = () => {
           >
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold">
               <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                Welcome to GasByGas
+                GasByGas
               </span>
             </h1>
             <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
-              Experience seamless gas delivery with real-time tracking and secure handling. 
-              Your trusted partner in energy solutions.
+              Seamless gas delivery with real-time tracking. Your trusted energy partner.
             </p>
             
             {/* CTA Buttons */}
@@ -120,7 +119,8 @@ const Hero = () => {
                 key={index}
                 variants={itemVariants}
                 whileHover={{ y: -5, scale: 1.02 }}
-                className="p-6 rounded-3xl bg-gray-800/30 backdrop-blur-md border border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-300"
+                className="backdrop-blur-xl bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50 
+                  hover:shadow-2xl transition-all duration-300"
               >
                 <div className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${feature.color} p-4 flex items-center justify-center text-white mb-6 shadow-lg`}>
                   {feature.icon}
@@ -150,7 +150,8 @@ const Hero = () => {
                 key={index}
                 variants={itemVariants}
                 whileHover={{ y: -5, scale: 1.02 }}
-                className="p-4 rounded-2xl bg-gray-800/20 backdrop-blur-sm border border-gray-700/50 hover:bg-gray-800/30 transition-all duration-300"
+                className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50 
+                  hover:shadow-2xl transition-all duration-300"
               >
                 <h4 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                   {stat.value}

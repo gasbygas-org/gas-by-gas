@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { m, AnimatePresence } from 'framer-motion';
 import { Suspense, lazy } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -12,11 +12,13 @@ import Footer from './components/Footer';
 
 // Lazy loaded pages
 const Home = lazy(() => import('./pages/Home'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const RequestForm = lazy(() => import('./components/RequestForm'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+
 
 // Loading component
 const LoadingScreen = () => (
@@ -50,9 +52,16 @@ Layout.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-// AnimatedRoutes component for page transitions
 const AnimatedRoutes = () => {
   const location = useLocation();
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUserData(JSON.parse(storedUser));
+    }
+  }, []);
 
   const pageVariants = {
     initial: {
@@ -68,6 +77,27 @@ const AnimatedRoutes = () => {
       y: -20
     }
   };
+
+  // Updated DashboardComponent
+  const DashboardComponent = () => {
+    // Add a check for userData loading
+    if (!userData) {
+        return null; // or a loading component
+    }
+
+    // Check role from userData
+    const userRole = userData.role;
+    console.log('Current user role:', userRole);
+
+    if (userRole === 'user') {
+        return <Dashboard />;
+    } else if (userRole === 'admin') {
+        return <Navigate to="/admin/dashboard" replace />;
+    }
+    
+    return <Navigate to="/login" />;
+};
+
 
   return (
     <AnimatePresence mode="wait">
@@ -86,6 +116,7 @@ const AnimatedRoutes = () => {
             </m.div>
           } 
         />
+        {/* Updated Dashboard route */}
         <Route 
           path="/dashboard" 
           element={
@@ -96,10 +127,27 @@ const AnimatedRoutes = () => {
               exit="exit"
               transition={{ duration: 0.3 }}
             >
-              <Dashboard />
+              <DashboardComponent />
             </m.div>
           } 
         />
+
+        {/* Admin Dashboard route */}
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <AdminDashboard />
+            </m.div>
+          } 
+        />
+
         <Route 
           path="/login" 
           element={
@@ -117,15 +165,15 @@ const AnimatedRoutes = () => {
         <Route 
           path="/register" 
           element={
-            <m.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.3 }}
-            >
-              <Register />
-            </m.div>
+              <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+              >
+                  <Register />
+              </m.div>
           } 
         />
         <Route 

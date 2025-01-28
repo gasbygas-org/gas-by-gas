@@ -8,8 +8,13 @@ export default {
     extend: {
       animation: {
         'gradient': 'gradient 15s ease infinite',
+        'spin-slow': 'spin 3s linear infinite',
+        'pulse-slow': 'pulse 3s linear infinite',
       },
       keyframes: {
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
         gradient: {
           '0%, 100%': {
             'background-size': '400% 400%',

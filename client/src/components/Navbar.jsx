@@ -1,110 +1,173 @@
-// src/components/Navbar.jsx
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Menu, X, User, LogOut } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+    const [userData, setUserData] = useState(null);
+    const navigate = useNavigate();
+    const [isScrolled, setIsScrolled] = useState(false);
 
-  const menuItems = ['Home', 'Dashboard', 'Login', 'Register'];
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 0);
+        };
+    
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+    
 
-  const menuVariants = {
-    closed: {
-      opacity: 0,
-      x: "-100%",
-      transition: {
-        duration: 0.2
-      }
-    },
-    open: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        duration: 0.3
-      }
-    }
-  };
+    useEffect(() => {
+        const user = localStorage.getItem('user');
+        if (user) {
+            setUserData(JSON.parse(user));
+        }
+    }, []);
 
-  return (
-    <m.nav 
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      className="fixed w-full z-50 bg-gray-900/80 backdrop-blur-xl border-b border-gray-800/50 shadow-lg"
-    >
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          <Link to="/">
-            <m.h1 
-              whileHover={{ scale: 1.05 }}
-              className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
-            >
-              GasByGas
-            </m.h1>
-          </Link>
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        navigate('/login');
+    };
 
-          {/* Desktop Menu */}
-          <ul className="hidden md:flex space-x-8">
-            {menuItems.map((item) => (
-              <li
-                key={item}
-              >
-                <Link 
-                  to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
-                  className="text-gray-300 hover:text-white transition-colors duration-300 relative group"
-                >
-                  {item}
-                  <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-500 transition-all duration-300 group-hover:w-full" />
-                </Link>
-              </li>
-            ))}
-          </ul>
+    // Role-based navigation links
+    const getNavLinks = () => {
+        const commonLinks = [
+            { name: 'Home', path: '/' }
+        ];
 
-          {/* Mobile Menu Button */}
-          <m.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-gray-300 hover:text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </m.button>
-        </div>
-      </div>
+        if (!userData) {
+            return [
+                ...commonLinks,
+                { name: 'Login', path: '/login' },
+                { name: 'Register', path: '/register' }
+            ];
+        }
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <m.div
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={menuVariants}
-            className="md:hidden bg-gray-900/95 backdrop-blur-xl border-b border-gray-800/50"
-          >
-            <div className="container mx-auto px-4 py-4">
-              <ul className="space-y-4">
-                {menuItems.map((item) => (
-                  <m.li
-                    key={item}
-                    whileHover={{ x: 10 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Link
-                      to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
-                      onClick={() => setIsOpen(false)}
-                      className="block text-gray-300 hover:text-white transition-colors duration-300 py-2"
-                    >
-                      {item}
-                    </Link>
-                  </m.li>
-                ))}
-              </ul>
+        switch (userData.role) {
+            case 'admin':
+                return [
+                    ...commonLinks,
+                    { name: 'Admin Dashboard', path: '/admin/dashboard' },
+                    { name: 'User Management', path: '/admin/users' },
+                ];
+            case 'outletmanager':
+                return [
+                    ...commonLinks,
+                    { name: 'Manager Dashboard', path: '/manager/dashboard' },
+                    { name: 'Gas Requests', path: '/manager/requests' },
+                ];
+            case 'user':
+                return [
+                    ...commonLinks,
+                    { name: 'Dashboard', path: '/dashboard' },
+                    { name: 'Request Gas', path: '/request' },
+                ];
+            default:
+                return commonLinks;
+        }
+    };
+
+    return (
+        <nav className={`fixed w-full z-50 transition-all duration-300 ${
+            isScrolled 
+                ? 'backdrop-blur-md bg-gray-900/50 border-b border-gray-800' 
+                : 'bg-transparent'
+        }`}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16">
+                    {/* Logo and brand */}
+                    <div className="flex-shrink-0">
+                        <Link to="/" className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
+                            GasByGas
+                        </Link>
+                    </div>
+
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:block">
+                        <div className="ml-10 flex items-center space-x-4">
+                            {getNavLinks().map((link) => (
+                                <Link
+                                    key={link.path}
+                                    to={link.path}
+                                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                >
+                                    {link.name}
+                                </Link>
+                            ))}
+                            {userData && (
+                                <div className="flex items-center space-x-4">
+                                    <div className="text-sm text-gray-300">
+                                        <User className="inline-block w-4 h-4 mr-1" />
+                                        {userData.name}
+                                    </div>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center text-red-400 hover:text-red-300 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    >
+                                        <LogOut className="w-4 h-4 mr-1" />
+                                        Logout
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Mobile menu button */}
+                    <div className="md:hidden">
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white focus:outline-none"
+                        >
+                            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                        </button>
+                    </div>
+                </div>
             </div>
-          </m.div>
-        )}
-      </AnimatePresence>
-    </m.nav>
-  );
+
+            {/* Mobile Navigation */}
+            <AnimatePresence>
+                {isOpen && (
+                    <m.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="md:hidden"
+                    >
+                        <div className="px-2 pt-2 pb-3 space-y-1 bg-gray-900/50 backdrop-blur-md">
+                            {getNavLinks().map((link) => (
+                                <Link
+                                    key={link.path}
+                                    to={link.path}
+                                    className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    {link.name}
+                                </Link>
+                            ))}
+                            {userData && (
+                                <>
+                                    <div className="text-sm text-gray-300 px-3 py-2">
+                                        <User className="inline-block w-4 h-4 mr-1" />
+                                        {userData.name}
+                                    </div>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center w-full text-red-400 hover:text-red-300 px-3 py-2 rounded-md text-sm font-medium"
+                                    >
+                                        <LogOut className="w-4 h-4 mr-1" />
+                                        Logout
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </m.div>
+                )}
+            </AnimatePresence>
+        </nav>
+    );
 };
 
 export default Navbar;
