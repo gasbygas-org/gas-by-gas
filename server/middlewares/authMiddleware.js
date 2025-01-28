@@ -1,21 +1,59 @@
-// authMiddleware.js
-const jwt = require('jsonwebtoken');
-const admin = require('../config/firebaseConfig'); // Adjust the path as needed
+const { admin } = require('../config/firebaseConfig');
+const UserRepository = require("../repositories/userRepository");
+const db = require("../config/db");
 
-// Verify the token
-module.exports = (req, res, next) => {
-    const token = req.header('Authorization') && req.header('Authorization').replace('Bearer ', '');
-
-    if (!token) {
-        return res.status(401).json({ message: 'No token, authorization denied' });
-    }
-
+// Verify Firebase token
+const verifyToken = async (req, res, next) => {
     try {
-        // Verify the token and get user data
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // Add the decoded user data to object
+        const token = req.headers.authorization?.split('Bearer ')[1];
+
+        if (!token) {
+            return res.status(401).json({ 
+                success: false,
+                message: 'No token provided' 
+            });
+        }
+
+        // Verify the token
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        req.user = decodedToken; // Attach user to request
+        next();
+
+    } catch (error) {
+        console.error('Token verification failed:', error);
+        res.status(401).json({ 
+            success: false,
+            message: 'Invalid or expired token' 
+        });
+    }
+};
+
+// Check if user exists in MySQL
+const requireProfileComplete = async (req, res, next) => {
+    try {
+        const userRepository = new UserRepository(db);
+        const user = await userRepository.getUserByUid(req.user.uid);
+
+        if (!user) {
+            return res.status(403).json({ 
+                success: false,
+                message: 'Please complete registration first' 
+            });
+        }
+
+        // Attach MySQL user data to request
+        req.mysqlUser = user;
         next();
     } catch (error) {
-        res.status(401).json({ message: 'Token is not valid' });
+        console.error('Profile check failed:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Internal server error' 
+        });
     }
+};
+
+module.exports = {
+    verifyToken,
+    requireProfileComplete
 };

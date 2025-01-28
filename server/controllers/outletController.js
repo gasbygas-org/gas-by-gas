@@ -1,7 +1,6 @@
 const OutletRepository = require("../repositories/outletRepository");
 const db = require("../config/db");
-
-const outletRepository = new OutletRepository(db); // Create a single instance to reuse in all methods
+const outletRepository = new OutletRepository(db);
 
 exports.addOutlet = async (req, res) => {
     const { outlet_name, address, district, phone, manager_id } = req.body;
@@ -53,7 +52,7 @@ exports.updateOutlet = async (req, res) => {
 
 exports.getOutletById = async (req, res) => {
     const { id } = req.params;
-
+    
     try {
         const outlet = await outletRepository.getOutletById(id);
         if (!outlet) {
@@ -69,7 +68,7 @@ exports.getOutletById = async (req, res) => {
 
 exports.deleteOutlet = async (req, res) => {
     const { id } = req.params;
-
+    
     try {
         const existingOutlet = await outletRepository.getOutletById(id);
         if (!existingOutlet) {
@@ -77,7 +76,6 @@ exports.deleteOutlet = async (req, res) => {
         }
 
         await outletRepository.deleteOutlet(id);
-
         res.status(200).json({ message: 'Outlet deleted successfully.' });
     } catch (error) {
         console.error('Error deleting outlet:', error);

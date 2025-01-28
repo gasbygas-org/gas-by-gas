@@ -3,92 +3,73 @@ class UserRepository {
         this.db = db;
     }
 
-    //check nic exists
     async nicExists(nic) {
-        const nicCheckQuery = `
-        SELECT COUNT(*) AS count FROM users WHERE nic = ?;
-    `;
-        const [rows] = await this.db.query(nicCheckQuery, [nic]);
-
-        console.log('NIC Check Query Result:', rows);
-
-
+        const query = `SELECT COUNT(*) AS count FROM users WHERE nic = ?`;
+        const [rows] = await this.db.query(query, [nic]);
+        console.log('NIC Check Result:', rows);
         return rows[0].count > 0;
     }
 
-    //check phone exists
     async phoneExist(phone) {
-        const nicCheckQuery = `
-        SELECT COUNT(*) AS count FROM users WHERE phone = ?;
-    `;
-        const [rows] = await this.db.query(nicCheckQuery, [phone]);
-
-        console.log('Phone Check Query Result:', rows);
-
-
+        const query = `SELECT COUNT(*) AS count FROM users WHERE phone = ?`;
+        const [rows] = await this.db.query(query, [phone]);
+        console.log('Phone Check Result:', rows);
         return rows[0].count > 0;
     }
 
-    //check email exists
-    async emailExists(email) {
-        const nicCheckQuery = `
-        SELECT COUNT(*) AS count FROM users WHERE email = ?;
-    `;
-        const [rows] = await this.db.query(nicCheckQuery, [email]);
-
-        console.log('Email Check Query Result:', rows);
-
-
-        return rows[0].count > 0;
-    }
-
-    //create new user
     async createUser(user) {
-        const { uid, nic, name, phone, email, password, address, role } = user;
+        const { uid, email, phone, nic, name, address, role, password } = user;
 
-        const roleQuery = `
-            SELECT id FROM roles WHERE role_name = ?;
-        `;
+        // Get role ID
+        const roleQuery = `SELECT id FROM roles WHERE role_name = ?`;
         const [roleResult] = await this.db.query(roleQuery, [role]);
 
         if (!roleResult || roleResult.length === 0) {
-            throw new Error(`Role '${role}' not found.`);
+            throw new Error(`Role '${role}' not found`);
         }
 
         const roleId = roleResult[0].id;
 
+        // Insert user
         const userQuery = `
-            INSERT INTO users (role_id, nic, name, phone, email, password, address, is_verified, created_at, uId)
-            VALUES (?, ?, ?, ?, ?, ?, ?, false, NOW(), ?);
+            INSERT INTO users (
+                role_id, 
+                nic, 
+                name, 
+                phone, 
+                email, 
+                address,
+                password,
+                is_verified, 
+                created_at, 
+                uId
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, true, NOW(), ?)
         `;
-        const values = [roleId, nic, name, phone, email, password, address, uid];
+
+        const values = [
+            roleId,
+            nic,
+            name,
+            phone,
+            email,
+            address,
+            password,
+            uid
+        ];
+
         await this.db.query(userQuery, values);
     }
-    async getAdminsAndStockManagers(offset, limit) {
+
+    async getUserByUid(uid) {
         const query = `
-        SELECT u.id, u.name, u.email, r.role_name 
-        FROM users u
-        INNER JOIN roles r ON u.role_id = r.id
-        WHERE r.role_name IN ('admin', 'outletmanger')
-    `;
-
-        const countQuery = `
-        SELECT COUNT(*) AS totalCount 
-        FROM users u
-        INNER JOIN roles r ON u.role_id = r.id
-        WHERE r.role_name IN ('admin', 'outletmanger');
-    `;
-
-        const [users] = await this.db.query(query, [limit, offset]);
-        const [[{ totalCount }]] = await this.db.query(countQuery);
-
-        return { users, totalCount };
+            SELECT u.*, r.role_name 
+            FROM users u 
+            JOIN roles r ON u.role_id = r.id 
+            WHERE u.uId = ?
+        `;
+        const [rows] = await this.db.query(query, [uid]);
+        return rows[0] || null;
     }
-    async getUserById(userId) {
-        const [result] = await this.db.execute('SELECT id, email FROM users WHERE id = ?', [userId]);
-        return result[0]; 
-    }
-
 }
 
 module.exports = UserRepository;

@@ -1,6 +1,6 @@
 const express = require('express');
 const { requestGas, approveRequest } = require('../controllers/userRequestController');
-const verifyToken = require('../middlewares/authMiddleware');
+const { verifyToken } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 

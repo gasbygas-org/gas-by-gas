@@ -1,9 +1,9 @@
 const UserAdminRepository = require("../repositories/userAdminRepository");
-const AdminUserRepository = require("../repositories/userRepository"); // Import the AdminUserRepository
+const AdminUserRepository = require("../repositories/userRepository");
 const db = require("../config/db");
 
 const userAdminRepository = new UserAdminRepository(db);
-const adminUserRepository = new AdminUserRepository(db); // Create a single instance of the AdminUserRepository
+const adminUserRepository = new AdminUserRepository(db);
 
 // Get users by role
 exports.getUsersByRole = async (req, res) => {
@@ -15,7 +15,6 @@ exports.getUsersByRole = async (req, res) => {
         }
 
         const users = await userAdminRepository.getUsersByRole(role);
-
         if (users.length === 0) {
             return res.status(404).json({ message: `No users found with the role '${role}'.` });
         }
@@ -29,12 +28,10 @@ exports.getUsersByRole = async (req, res) => {
 
 exports.getAdminsAndStockManagers = async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
-
+    
     try {
         const offset = (page - 1) * limit;
-
         const { users, totalCount } = await adminUserRepository.getAdminsAndStockManagers(offset, parseInt(limit));
-
         const totalPages = Math.ceil(totalCount / limit);
 
         res.status(200).json({
