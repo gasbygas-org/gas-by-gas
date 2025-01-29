@@ -187,4 +187,146 @@ exports.approveRequest = async (req, res) => {
         });
     }
 };
+exports.markAsDelivered = async (req, res) => {
+    const { requestId } = req.body;
 
+    if (!requestId) {
+        return res.status(400).json({ message: "Request ID is required." });
+    }
+
+    try {
+        const userRequest = await userRequestRepository.getUserRequestById(requestId);
+        if (!userRequest) {
+            return res.status(404).json({ message: "User request not found." });
+        }
+
+        const { user_id, outlet_id, gas_type_id, quantity, request_status } = userRequest;
+
+        if (request_status !== 'Approved') {
+            return res.status(400).json({ message: "Only approved requests can be marked as delivered." });
+        }
+
+        const user = await userRepository.getUserById(user_id);
+        if (!user || !user.email) {
+            return res.status(404).json({ message: "User not found or email not available." });
+        }
+
+        const outletStock = await userRequestRepository.getOutletStock(outlet_id, gas_type_id);
+        if (outletStock < quantity) {
+            return res.status(400).json({ message: "Insufficient stock to mark request as delivered." });
+        }
+
+        await userRequestRepository.updateUserRequestStatus(requestId, 'Delivered');
+        await userRequestRepository.updateOutletStock(outlet_id, gas_type_id, -quantity);
+
+        await transporter.sendMail({
+            from: '"Bodo App" <3treecrops2@gmail.com>',
+            to: email,
+            subject: 'Gas Request Dilivered',
+            html: `
+                <h1>Your Gas Request Has Been Delivered</h1>
+                <p>Your request for ${quantity} units of gas has been successfully delivered.</p>
+                <p>Thank you for using our service!</p>
+                <p>If you have any questions, contact support at <a href="mailto:3treecrops2@gmail.com">3treecrops2@gmail.com</a>.</p>
+            `,
+        });
+
+        return res.status(200).json({ message: "Request marked as delivered and stock updated successfully." });
+    } catch (error) {
+        console.error("Error marking request as delivered:", error);
+        return res.status(500).json({
+            message: "An error occurred while processing the delivery request.",
+            error: error.message,
+        });
+    }
+};
+exports.getUserRequests = async (req, res) => {
+    const { page = 1, pageSize = 10, requestStatus, outletId, search } = req.query;
+
+    const pageNumber = parseInt(page, 10);
+    const limit = parseInt(pageSize, 10);
+
+    if (pageNumber < 1 || limit < 1) {
+        return res.status(400).json({ message: "Invalid page or pageSize parameters." });
+    }
+
+    try {
+        const offset = (pageNumber - 1) * limit;
+
+        // Initialize query filters and parameters
+        const filters = [];
+        const queryParams = [];
+
+        if (requestStatus) {
+            filters.push(`ur.request_status = ?`);
+            queryParams.push(requestStatus);
+        }
+
+        if (outletId) {
+            filters.push(`ur.outlet_id = ?`);
+            queryParams.push(outletId);
+        }
+
+        if (search) {
+            filters.push(`(users.email LIKE ? OR users.nic LIKE ?)`);
+            queryParams.push(`%${search}%`, `%${search}%`);
+        }
+
+        // Construct the WHERE clause dynamically
+        const whereClause = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
+
+        const query = `
+            SELECT 
+                ur.id, ur.user_id, ur.outlet_id, ur.gas_type_id, ur.quantity, ur.request_status,
+                ur.created_at, ur.token, ur.delivery_date, ur.pickup_period_start, ur.pickup_period_end,
+                users.email AS user_email, users.nic AS user_nic
+            FROM user_requests ur
+            INNER JOIN users ON ur.user_id = users.id
+            ${whereClause}
+            LIMIT ? OFFSET ?
+        `;
+        queryParams.push(limit, offset);
+
+        // Execute the main query
+        const [userRequests] = await db.query(query, queryParams);
+
+        // Transform buffer data, if any
+        const transformedRequests = userRequests.map((request) => {
+            const transformedRequest = {};
+            for (const [key, value] of Object.entries(request)) {
+                if (Buffer.isBuffer(value)) {
+                    transformedRequest[key] = value.toString("utf-8");
+                } else {
+                    transformedRequest[key] = value;
+                }
+            }
+            return transformedRequest;
+        });
+
+        // Query to fetch total count of user requests
+        const countQuery = `
+            SELECT COUNT(*) AS total
+            FROM user_requests ur
+            INNER JOIN users ON ur.user_id = users.id
+            ${whereClause}
+        `;
+        const [countResult] = await db.query(countQuery, queryParams.slice(0, queryParams.length - 2));
+        const totalCount = countResult[0]?.total || 0;
+
+        return res.status(200).json({
+            data: transformedRequests,
+            pagination: {
+                currentPage: pageNumber,
+                pageSize: limit,
+                totalPages: Math.ceil(totalCount / limit),
+                totalRecords: totalCount,
+            },
+        });
+    } catch (error) {
+        console.error("Error fetching user requests:", error);
+        return res.status(500).json({
+            message: "An error occurred while fetching user requests.",
+            error: error.message,
+        });
+    }
+};
