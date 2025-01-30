@@ -1,20 +1,52 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LogOut, User, Mail, Phone, CreditCard, MapPin } from 'lucide-react'; // Import icons
+import { Link, useNavigate } from 'react-router-dom';
+import { LogOut, User, Mail, Phone, CreditCard, MapPin, Bell } from 'lucide-react';
+import RequestHistory from '../components/User/RequestHistory';
+import TokenCard from '../components/User/TokenCard';
+import NotificationList from '../components/User/NotificationList';
 import API from '../api/config';
 
 const UserDashboard = () => {
     const [userData, setUserData] = useState(null);
+    const [requests, setRequests] = useState([]);
+    const [activeToken, setActiveToken] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
     const navigate = useNavigate();
+
     
     useEffect(() => {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user) {
-            setUserData(user);
-        } else {
-            navigate('/login');
-        }
+        const fetchDashboardData = async () => {
+            try {
+                // Get user data
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user) {
+                    navigate('/login');
+                    return;
+                }
+                setUserData(user);
+
+                // Fetch requests, active token, and notifications
+                const [requestsRes, tokenRes, notificationsRes] = await Promise.all([
+                    API.get('/user/gas/requests'),
+                    API.get('/user/active-token'),
+                    API.get('/user/notifications')
+                ]);
+
+                setRequests(requestsRes.data.requests);
+                setActiveToken(tokenRes.data.token);
+                setNotifications(notificationsRes.data.notifications);
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+                setError('Failed to load dashboard data');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
     }, [navigate]);
+    
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -29,8 +61,6 @@ const UserDashboard = () => {
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-900/50 to-gray-900" />
             </div>
-
-            {/* Main content */}
             <div className="relative">
                 {/* Navigation */}
                 <nav className="backdrop-blur-xl bg-gray-900/30 border-b border-gray-700/50">
@@ -41,12 +71,22 @@ const UserDashboard = () => {
                                     User Dashboard
                                 </span>
                             </div>
-                            <div className="flex items-center">
+                            <div className="flex items-center space-x-4">
+                                {/* Notification Bell */}
+                                <button 
+                                    onClick={() => setShowNotifications(!showNotifications)}
+                                    className="relative p-2 text-gray-300 hover:text-white transition-colors"
+                                >
+                                    <Bell className="w-6 h-6" />
+                                    {notifications.length > 0 && (
+                                        <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 transform translate-x-1 -translate-y-1" />
+                                    )}
+                                </button>
+                                
                                 <button
                                     onClick={handleLogout}
                                     className="inline-flex items-center px-4 py-2 bg-red-500/10 text-red-400 
-                                        border border-red-500/50 rounded-xl hover:bg-red-500/20 
-                                        transition-all duration-200"
+                                        border border-red-500/50 rounded-xl hover:bg-red-500/20 transition-all duration-200"
                                 >
                                     <LogOut className="w-4 h-4 mr-2" />
                                     Logout
@@ -94,15 +134,23 @@ const UserDashboard = () => {
                                     </div>
                                 </div>
 
-                                {/* Additional Dashboard Components */}
-                                <div className="bg-gray-900/50 p-6 rounded-2xl border border-gray-700/50">
-                                    <h3 className="text-xl font-semibold mb-4 text-gray-200">
-                                        Recent Activities
-                                    </h3>
-                                    <p className="text-gray-400">
-                                        No recent activities to display.
-                                    </p>
+                                <div className="mb-8">
+                                    <TokenCard token={activeToken} />
                                 </div>
+
+                                {/* Add Request History */}
+                                <div className="mb-8">
+                                    <RequestHistory requests={requests} />
+                                </div>
+
+                                {/* Add Notification List as a modal */}
+                                {showNotifications && (
+                                    <NotificationList 
+                                        notifications={notifications}
+                                        onClose={() => setShowNotifications(false)}
+                                    />
+                                )}
+
                             </div>
                         </div>
                     )}

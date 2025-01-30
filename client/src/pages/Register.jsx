@@ -207,7 +207,7 @@ const Register = () => {
                                     to="/login" 
                                     className="text-blue-400 hover:text-blue-300 transition-colors duration-150"
                                 >
-                                    Login here
+                                    Login
                                 </Link>
                             </p>
                         </div>
@@ -220,7 +220,7 @@ const Register = () => {
                                     hover:bg-gray-700/50 hover:text-white focus:outline-none focus:ring-2 
                                     focus:ring-gray-600/50"
                             >
-                                ← Back to Home
+                                ← Back
                             </Link>
                         </div>
                     </form>

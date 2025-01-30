@@ -14,7 +14,7 @@ import Footer from './components/Footer';
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
-const RequestForm = lazy(() => import('./components/RequestForm'));
+const GasRequestForm = lazy(() => import('./components/GasRequestForm'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -177,17 +177,17 @@ const AnimatedRoutes = () => {
           } 
         />
         <Route 
-          path="/request" 
+          path="/request-gas" 
           element={
-            <m.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.3 }}
-            >
-              <RequestForm />
-            </m.div>
+              <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+              >
+                  <GasRequestForm />
+              </m.div>
           } 
         />
         <Route path="*" element={<NotFound />} />

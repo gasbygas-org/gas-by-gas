@@ -44,16 +44,21 @@ const Login = () => {
                 formData.password
             );
 
-            console.log('Firebase auth successful');
+            console.log('Firebase auth successful, getting token...');
             const idToken = await userCredential.user.getIdToken();
-            
+            console.log('Making API request...');
             const response = await API.post('/auth/login', {
                 email: formData.email,
                 uid: userCredential.user.uid,
                 token: idToken
             });
 
+            if (!response.data) {
+                throw new Error('No response data received');
+            }
+
             if (response.data.success) {
+                console.log('Login successful, redirecting...');
                 localStorage.setItem('user', JSON.stringify(response.data.user));
                 localStorage.setItem('token', response.data.token);
 
@@ -78,7 +83,7 @@ const Login = () => {
                 }
             }
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('Login error details:', error);
             setError(error.response?.data?.message || 'Login failed');
             setStatus({
                 type: 'error',
@@ -163,7 +168,7 @@ const Login = () => {
                   {/* Navigation Links */}
                   <div className="mt-6 text-center">
                         <p className="text-gray-400">
-                            Don't have an account?{' '}
+                            Don&apos;t have an account?{' '}
                             <Link 
                                 to="/register" 
                                 className="text-blue-400 hover:text-blue-300 transition-colors duration-150"
@@ -181,7 +186,7 @@ const Login = () => {
                                 hover:bg-gray-700/50 hover:text-white focus:outline-none focus:ring-2 
                                 focus:ring-gray-600/50"
                         >
-                            ← Back to Home
+                            ← Back
                         </Link>
                     </div>
                 </div>
