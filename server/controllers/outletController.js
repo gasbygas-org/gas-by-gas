@@ -6,24 +6,58 @@ exports.addOutlet = async (req, res) => {
     const { outlet_name, address, district, phone, manager_id } = req.body;
 
     try {
+        // Validate required fields
         if (!outlet_name || !address || !district || !phone || !manager_id) {
-            return res.status(400).json({ message: 'All fields are required.' });
+            return res.status(400).json({ 
+                success: false,
+                message: 'All fields are required' 
+            });
         }
 
-        await outletRepository.createOutlet({
+        // Check if manager exists
+        const [manager] = await db.query(
+            'SELECT * FROM users WHERE id = ?',
+            [manager_id]
+        );
+
+        if (!manager.length) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid manager ID'
+            });
+        }
+
+        // Create outlet
+        const outletId = await outletRepository.createOutlet({
             outlet_name,
             address,
             district,
             phone,
-            manager_id,
+            manager_id
         });
 
-        res.status(201).json({ message: 'Outlet added successfully.' });
+        // Create initial stock record
+        await db.query(
+            'INSERT INTO stocks (outlet_id, created_at) VALUES (?, NOW())',
+            [outletId]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: 'Outlet created successfully',
+            outletId
+        });
+
     } catch (error) {
         console.error('Error adding outlet:', error);
-        res.status(500).json({ message: 'Failed to add outlet.', error: error.message });
+        res.status(500).json({
+            success: false,
+            message: 'Failed to create outlet',
+            error: error.message
+        });
     }
 };
+
 
 exports.updateOutlet = async (req, res) => {
     const { id } = req.params;

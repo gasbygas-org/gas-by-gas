@@ -5,9 +5,11 @@ const db = require("../config/db");
 // Verify Firebase token
 const verifyToken = async (req, res, next) => {
     try {
+        console.log('Headers:', req.headers);
         const token = req.headers.authorization?.split('Bearer ')[1];
 
         if (!token) {
+            console.log('No token found in request');
             return res.status(401).json({ 
                 success: false,
                 message: 'No token provided' 
@@ -15,7 +17,9 @@ const verifyToken = async (req, res, next) => {
         }
 
         // Verify the token
+        console.log('Verifying token...');
         const decodedToken = await admin.auth().verifyIdToken(token);
+        console.log('Token verified:', decodedToken);
         req.user = decodedToken; // Attach user to request
         next();
 
