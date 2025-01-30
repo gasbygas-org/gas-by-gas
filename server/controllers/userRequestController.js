@@ -32,8 +32,8 @@ exports.requestGas = async (req, res) => {
         // Calculate total available gas (outlet stock + scheduled delivery)
         const outletStock = await userRequestRepository.getOutletGasAvailability(outletId, gasTypeId);
         const scheduledDelivery = await userRequestRepository.getScheduledDelivery(outletId, gasTypeId);
-        const totalAvailableGas = 
-            (outletStock?.stockQuantity || 0) + 
+        const totalAvailableGas =
+            (outletStock?.stockQuantity || 0) +
             (scheduledDelivery?.quantity || 0);
 
         // Check if requested gas is available
@@ -241,7 +241,7 @@ exports.markAsDelivered = async (req, res) => {
     }
 };
 exports.getUserRequests = async (req, res) => {
-    const { page = 1, pageSize = 10, requestStatus, outletId, search } = req.query;
+    const { page = 1, pageSize = 10, requestStatus, outletId, search, userId } = req.query;
 
     const pageNumber = parseInt(page, 10);
     const limit = parseInt(pageSize, 10);
@@ -272,6 +272,11 @@ exports.getUserRequests = async (req, res) => {
             queryParams.push(`%${search}%`, `%${search}%`);
         }
 
+        if (userId) {
+            filters.push(`ur.user_id = ?`);
+            queryParams.push(userId);
+        }
+
         // Construct the WHERE clause dynamically
         const whereClause = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
 
@@ -279,10 +284,15 @@ exports.getUserRequests = async (req, res) => {
             SELECT 
                 ur.id, ur.user_id, ur.outlet_id, ur.gas_type_id, ur.quantity, ur.request_status,
                 ur.created_at, ur.token, ur.delivery_date, ur.pickup_period_start, ur.pickup_period_end,
-                users.email AS user_email, users.nic AS user_nic
+                users.email AS user_email, users.nic AS user_nic,
+                CONCAT(outlets.outlet_name, ', ', outlets.district) AS outlet,
+                gas_types.gas_type_name AS gas_type
             FROM user_requests ur
             INNER JOIN users ON ur.user_id = users.id
+            INNER JOIN outlets ON ur.outlet_id = outlets.id
+            INNER JOIN gas_types ON ur.gas_type_id = gas_types.id
             ${whereClause}
+            ORDER BY ur.id DESC
             LIMIT ? OFFSET ?
         `;
         queryParams.push(limit, offset);

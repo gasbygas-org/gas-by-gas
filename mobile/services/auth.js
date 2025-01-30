@@ -1,68 +1,42 @@
-import Constants from 'expo-constants';
+import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const SERVER_URL = Constants.expoConfig.extra.serverUrl;
+import apiClient from './apiClient';
 
 export const getAuthToken = async () => {
-  try {
-    const token = await AsyncStorage.getItem('authToken');
-    return token;
-  } catch (error) {
-    console.error('Error fetching auth token:', error);
-    return null;
-  }
+  // return await SecureStore.getItemAsync('auth_token');
+  const token = await AsyncStorage.getItem('auth_token');
+  return token ?? null;
+};
+
+export const getAuthUser = async () => {
+  const user = await AsyncStorage.getItem('auth_user');
+  return user ? JSON.parse(user) : null;
 };
 
 export const signin = async (credentials) => {
   try {
-    const response = await fetch(`${SERVER_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      await AsyncStorage.setItem('authToken', data.token);
-      return data;
-    } else {
-      throw new Error(data.message);
-    }
+    const response = await apiClient.post('/api/auth/login', credentials);
+    return response.data;
   } catch (error) {
-    console.error('Error logging in:', error);
-    return null;
+    console.error('Login error:', error.response?.data || error.message);
+    throw error;
   }
 };
 
 export const signup = async (credentials) => {
   try {
-    const response = await fetch(`${SERVER_URL}/api/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      await AsyncStorage.setItem('authToken', data.token);
-      return data;
-    } else {
-      throw new Error(data.message);
-    }
+    const response = await apiClient.post('/api/auth/register', credentials);
+    return response.data;
   } catch (error) {
-    console.error('Error signing up:', error);
-    return null;
+    console.error('Signup error:', error.response?.data || error.message);
+    throw error;
   }
 };
 
-export const logout = async () => {
-  try {
-    await AsyncStorage.removeItem('authToken');
-  } catch (error) {
-    console.error('Error logging out:', error);
-  }
+export const signout = async () => {
+  await Promise.all([
+    // SecureStore.deleteItemAsync('auth_token'),
+    AsyncStorage.removeItem('auth_token'),
+    AsyncStorage.removeItem('auth_user'),
+  ]);
 };
