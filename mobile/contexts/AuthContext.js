@@ -1,41 +1,54 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { getAuthToken, setAuthToken } from '../services/auth';
-import { Text } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { signin, signup, signout, getAuthToken, getAuthUser } from '../services/auth';
 
-export const AuthContext = createContext();
+export const handleAuthSuccess = async (token, userData) => {
+    await Promise.all([
+        // SecureStore.setItemAsync('auth_token', token),
+        AsyncStorage.setItem('auth_token', token),
+        AsyncStorage.setItem('auth_user', JSON.stringify(userData)),
+    ]);
+};
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+export const login = async (credentials) => {
+    try {
+        const { token, user } = await signin(credentials);
+        console.log(token, user);
+        await handleAuthSuccess(token, user);
+        return true;
+    } catch (error) {
+        throw error;
+    }
+};
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const token = await getAuthToken();
-      if (token) {
-        setUser({ token });
-      }
-      setLoading(false);
-    };
+export const register = async (credentials) => {
+    try {
+        const { token, user } = await signup(credentials);
+        // await handleAuthSuccess(token, user);
+        return true;
+    } catch (error) {
+        throw error;
+    }
+};
 
-    fetchUser();
-  }, []);
+export const logout = async () => {
+    try {
+        await signout();
+    } catch (error) {
+        console.error('Logout error:', error);
+        throw error;
+    }
+};
 
-  const login = async (credentials) => {
-    const token = await setAuthToken(credentials);
-    setUser({ token });
-  };
-
-  const logout = () => {
-    setUser(null);
-  };
-
-  if (loading) {
-    return <Text>Loading...</Text>;
-  }
-
-  return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+export const loadAuthState = async () => {
+    try {
+        const [storedToken, storedUser] = await Promise.all([
+            getAuthToken(),
+            getAuthUser(),
+        ]);
+        return { storedToken, storedUser };
+    } catch (error) {
+        console.error('Error loading auth state:', error);
+        return { storedToken: null, storedUser: null };
+    }
 };

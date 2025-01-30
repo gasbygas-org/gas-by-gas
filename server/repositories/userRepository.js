@@ -86,7 +86,11 @@ class UserRepository {
     }
     async getUserById(userId) {
         const [result] = await this.db.execute('SELECT id, email FROM users WHERE id = ?', [userId]);
-        return result[0]; 
+        return result[0];
+    }
+    async getUserByEmail(userEmail) {
+        const [result] = await this.db.execute('SELECT id, email, nic, name, phone, address FROM users WHERE email = ?', [userEmail]);
+        return result[0];
     }
 
 }

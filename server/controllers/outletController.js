@@ -84,3 +84,16 @@ exports.deleteOutlet = async (req, res) => {
         res.status(500).json({ message: 'Failed to delete outlet.', error: error.message });
     }
 };
+
+exports.getAllOutlets = async (req, res) => {
+    try {
+        const outlets = await outletRepository.getAllOutlets();
+        res.status(200).json(outlets);
+    } catch (error) {
+        console.error('Error fetching outlets:', error);
+        res.status(500).json({
+            message: 'Failed to fetch outlets',
+            error: error.message
+        });
+    }
+};

@@ -3,6 +3,16 @@ class OutletRepository {
         this.db = db;
     }
 
+    async getAllOutlets() {
+        const query = `
+            SELECT id, outlet_name, address, district, phone, manager_id 
+            FROM outlets 
+            ORDER BY outlet_name ASC;
+        `;
+        const [rows] = await this.db.query(query);
+        return rows;
+    }
+
     async createOutlet(outlet) {
         const { outlet_name, address, district, phone, manager_id } = outlet;
 

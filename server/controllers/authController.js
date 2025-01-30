@@ -18,7 +18,7 @@ exports.register = async (req, res) => {
     const { email, password, name, role, nic, phone, address } = req.body;
 
     try {
-        const validRoles = ['user', 'admin'];
+        const validRoles = ['user', 'admin', 'dispatch_admin', 'outlet_manager', 'business'];
         if (!validRoles.includes(role)) {
             return res.status(400).json({ message: 'Invalid role' });
         }
@@ -131,6 +131,9 @@ exports.login = async (req, res) => {
         const userData = userDoc.data();
         const { role } = userData;
 
+        const userRepository = new UserRepository(db);
+        const userRecord = await userRepository.getUserByEmail(email);
+
         const jwtToken = jwt.sign({ uid: localId, email, role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         res.status(200).json({
@@ -141,7 +144,12 @@ exports.login = async (req, res) => {
                 email,
                 role,
                 idToken,
-                refreshToken
+                refreshToken,
+                name: userRecord.name,
+                phone: userRecord.phone,
+                address: userRecord.address,
+                nic: userRecord.nic,
+                id: userRecord.id,
             }
         });
 

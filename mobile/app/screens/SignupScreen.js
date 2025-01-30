@@ -1,81 +1,148 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text } from 'react-native';
-import { signup } from '../../services/auth';
+import { View, TextInput, Button, Text, StyleSheet, ScrollView } from 'react-native';
+import { loadAuthState, login, register, logout } from '../../contexts/AuthContext';
 
-const SignupScreen = ({ navigation }) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [phone, setPhone] = useState('');
-    const [nic, setNic] = useState('');
-    const [name, setName] = useState('');
-    const [address, setAddress] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+const SignupScreen = ({ navigation/*, register*/ }) => {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        phone: '',
+        nic: '',
+        address: ''
+    });
     const [isPasswordStrong, setIsPasswordStrong] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
-    const handlePasswordChange = (password) => {
-        setPassword(password);
-        // simple password strength check
-        setIsPasswordStrong(password.length >= 8);
+    const handleChange = (name, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
+        if (name === 'password') {
+            setIsPasswordStrong(value.length >= 8);
+        }
     };
 
-    const role = 'user';
+    const validateForm = () => {
+        const requiredFields = ['name', 'email', 'password', 'phone', 'nic', 'address'];
+        return requiredFields.every(field => formData[field].trim());
+    };
+
     const handleSubmit = async () => {
-        if (!email || !password || !phone || !nic || !name || !address) {
-            setErrorMessage('All fields are required.');
+        if (!validateForm()) {
+            setErrorMessage('All fields are required');
             return;
         }
 
-        const result = await signup({ email, password, phone, nic, name, address, role });
+        if (!isPasswordStrong) {
+            setErrorMessage('Password must be at least 8 characters');
+            return;
+        }
 
-        if (result.token) {
-            navigation.navigate('Login');
-        } else {
-            setErrorMessage('Signup failed. Please try again.');
+        try {
+            const success = await register({ ...formData, role: 'user' });
+            if (success) navigation.replace('Login');
+        } catch (error) {
+            setErrorMessage(error.message || 'Please try again');
         }
     };
 
     return (
-        <View>
-            {errorMessage ? <Text style={{ color: 'red' }}>{errorMessage}</Text> : null}
-            <TextInput
-                onChangeText={setName}
-                value={name}
-                placeholder="Name"
-            />
-            <TextInput
-                onChangeText={setEmail}
-                value={email}
-                placeholder="Email"
-            />
-            <TextInput
-                onChangeText={handlePasswordChange}
-                value={password}
-                secureTextEntry
-                placeholder="Password"
-            />
-            <TextInput
-                onChangeText={setPhone}
-                value={phone}
-                placeholder="Phone Number"
-            />
-            <TextInput
-                onChangeText={setNic}
-                value={nic}
-                placeholder="NIC"
-            />
-            <TextInput
-                onChangeText={setAddress}
-                value={address}
-                placeholder="Address"
-            />
-            {password && (
-                <Text style={{ color: isPasswordStrong ? 'green' : 'red' }}>
-                    {isPasswordStrong ? 'Strong password' : 'Password must be at least 8 characters'}
-                </Text>
-            )}
-            <Button onPress={handleSubmit} title="Sign Up" />
-        </View>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View style={styles.container}>
+                <Text style={styles.title}>Create Account</Text>
+                {errorMessage ? <Text style={{ color: 'red' }}>{errorMessage}</Text> : null}
+
+                {Object.entries(formData).map(([key, value]) => (
+                    key !== 'password' ? (
+                        <TextInput
+                            key={key}
+                            style={styles.input}
+                            placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+                            value={value}
+                            onChangeText={text => handleChange(key, text)}
+                            autoCapitalize={key === 'email' ? 'none' : 'words'}
+                            keyboardType={
+                                key === 'email' ? 'email-address' :
+                                    key === 'phone' ? 'phone-pad' : 'default'
+                            }
+                        />
+                    ) : (
+                        <View key={key} style={styles.passwordContainer}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Password"
+                                value={value}
+                                onChangeText={text => handleChange(key, text)}
+                                secureTextEntry
+                            />
+                            {formData.password && (
+                                <Text style={[styles.passwordStrength, { color: isPasswordStrong ? 'green' : 'red' }]}>
+                                    {isPasswordStrong ? '✓ Strong' : '✗ Weak'}
+                                </Text>
+                            )}
+                        </View>
+                    )
+                ))}
+
+                <View style={styles.buttonContainer}>
+                    <Button
+                        title="Sign Up"
+                        onPress={handleSubmit}
+                        color="#2e86de"
+                    />
+                    <Button
+                        title="Back to Home"
+                        onPress={() => navigation.replace('Home')}
+                        color="#666"
+                    />
+                </View>
+            </View>
+        </ScrollView>
     );
 };
+
+const styles = StyleSheet.create({
+    scrollContainer: {
+        flexGrow: 1,
+    },
+    scrollView: {
+        flex: 1,
+    },
+    container: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: '#fff',
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 30,
+        textAlign: 'center',
+    },
+    input: {
+        height: 50,
+        borderColor: '#ddd',
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 15,
+        marginBottom: 15,
+        fontSize: 16,
+    },
+    passwordContainer: {
+        marginBottom: 15,
+    },
+    passwordStrength: {
+        fontSize: 12,
+        marginTop: 4,
+        marginLeft: 5,
+    },
+    buttonContainer: {
+        marginTop: 20,
+        gap: 10,
+    },
+});
 
 export default SignupScreen;
