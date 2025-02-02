@@ -51,7 +51,6 @@ GOAL		Implement advanced features, testing, and final integrations
 Backend	
     Implement delivery scheduling and notification endpoints (/schedule-delivery, /send-notification)	
         Develop automated SMS/email notification system to update customers about order details and pickup dates.
-		Integrate a system to trigger automatic reorder notifications to the head office when outlet stock runs low.
 		Develop a system to recommend optimal reorder quantities based on historical data and demand forecasts.
 	Add role-based access controls	
         Implement a role-based access control system to grant different levels of access to consumers, outlet managers, and head office staff.
@@ -63,19 +62,13 @@ Backend
         Create daily reports that provide an overview of total requests, completed orders, stock levels, popular cylinder types, and potential delivery delays.
 	Implement audit logging	
         Implement transaction logging to create an audit trail for security and accountability.
-	Implement data management features (periodic purging, backup)	
-	Begin integration with travel mechanisms API (if available)	
-        Explore integration with third-party mapping and logistics providers for route optimization and real-time vehicle tracking.
 Frontend	
     Add delivery schedule visualization	
 	Finalize outlet and head office dashboards	
 	Conduct UI/UX testing	
 	Develop Head Office dashboard UI	
-	Implement advanced reporting visualizations and filters	
-        Implement customizable dashboards and incorporate predictive analytics capabilities for enhanced reporting.
 Mobile	
-    Implement offline caching for mobile	
-	Finalize push notifications and delivery updates	
+    Finalize push notifications and delivery updates	
 	Perform end-to-end testing with backend	
 	Design and implement UI for viewing delivery schedules	
 Test & Documentation	
@@ -85,15 +78,21 @@ Test & Documentation
 	Finalize documentation for all added features	
 	Conduct security testing, including validation and fraud detection	
         Implement robust authentication measures, including multi-factor authentication.
-		Implement data encryption for sensitive data both in transit and at rest.
-		Conduct regular security audits to identify and address vulnerabilities.
-	Prepare documentation for localization and compliance	
 
 
 Week 4		Report Writing										
 Report Drafting	
     Write sections: introduction, system design, implementation, testing, results	
 	Include diagrams and relevant data	
+        System architecture design with the communication Diagram
+        Use case diagram
+        EER diagram
+        Class diagram
+        Sequence diagram
+        Activity diagram
+        Pseudocodes
+        Flow charts
+        Software-testing design
 Team Review	
     Review and finalize the report	
 	Prepare presentation slides	

@@ -1,0 +1,124 @@
+GasByGas System Scenario in Pseudocode and Story Form
+
+Pseudocode
+
+BEGIN GasByGasSystem
+
+    // User Access
+    User accesses interface via Web/Mobile App
+    DISPLAY "Welcome to GasByGas"
+    PROMPT User to register/login
+    IF User not registered THEN
+        PROMPT for registration details (NIC, Phone, Email, Address)
+        VALIDATE unique identity (NIC/Phone/Email)
+        IF identity already exists THEN
+            DISPLAY "Registration failed. Duplicate identity."
+        ELSE
+            CREATE user account
+            DISPLAY "Registration successful. Please log in."
+        ENDIF
+    ELSE
+        VALIDATE login credentials
+        IF invalid credentials THEN
+            DISPLAY "Login failed. Try again."
+        ELSE
+            DISPLAY "Login successful."
+        ENDIF
+    ENDIF
+
+    // Gas Request
+    PROMPT User to select gas type and outlet
+    CHECK outlet gas availability
+    IF no scheduled delivery or stock depleted THEN
+        DISPLAY "No gas available. Request denied."
+    ELSE
+        CREATE token with delivery date and pickup period (2 weeks tolerance)
+        DISPLAY token details
+        SEND SMS/Email notification for token confirmation
+    ENDIF
+
+    // Outlet Requesting Gas Cylinders
+    Outlet manager logs in to the system
+    PROMPT outlet manager to enter required gas cylinder quantity
+    SUBMIT request to head office
+    DISPLAY \"Request submitted successfully. Awaiting approval.\"
+
+    // Head Office Allocates Cylinders to Outlets
+    Head office logs in to the system
+    VIEW pending requests from outlets
+    EVALUATE each outlet's demand based on:
+        Previous sales data
+        Current stock levels
+        Regional demand trends
+    CALCULATE optimal allocation for each outlet
+    APPROVE or REVISE requested quantities
+    SCHEDULE deliveries and update system
+    NOTIFY respective outlet managers
+
+    // Gas Delivery Notification
+    IF scheduled delivery confirmed by dispatch office THEN
+        SEND SMS/Email notification to token holders:
+            "Bring empty cylinder and payment by [date]"
+        FOR each token holder
+            PROMPT User to confirm empty cylinder handover
+            IF User fails to confirm THEN
+                NOTIFY outlet manager for reallocation
+                Outlet manager reallocates gas and notifies via SMS/Email/Call
+            ENDIF
+        ENDFOR
+    ENDIF
+
+    // Day Before Delivery
+    SEND SMS/Email reminder to token holders:
+        "Collect gas cylinder tomorrow at [outlet]"
+
+    // Industrial and Business Requests
+    IF User is industrial/business THEN
+        VALIDATE organization certification
+        IF invalid certification THEN
+            DISPLAY "Request denied. Invalid certification."
+        ELSE
+            PROCESS request under industrial category
+        ENDIF
+    ENDIF
+
+    // Outlet Manager Functions
+    Outlet manager logs in
+    VIEW token details
+    MARK requests as fulfilled upon receiving empties and payment
+    UPDATE request status in the system
+
+    // Head Office Functions
+    Head office logs in
+    VIEW outlet status and distribution data
+    MONITOR and MANAGE gas supply chain
+
+END GasByGasSystem
+
+Story
+
+GasByGas, a leading LP gas distributor in Sri Lanka, wanted to enhance its distribution services by introducing an online gas requesting and delivery system. The new system aimed to streamline gas distribution, ensure efficient tracking, and improve customer satisfaction.
+
+User Access and Registration
+It all begins when a customer opens the GasByGas interface on their web browser or mobile app. The welcoming screen invites them to log in or register. New users provide their NIC, phone number, email, and address for registration. The system verifies these details to prevent duplicate identities. Successful registration allows the user to log in and proceed; otherwise, they are prompted to correct any issues.
+
+Requesting Gas
+Once logged in, the customer selects the type of gas and their preferred outlet. The system checks the availability of gas at the selected outlet. If no scheduled delivery exists or the stock is depleted, a message informs the user that their request cannot be processed. Otherwise, the system generates a token with a delivery date and a two-week pickup tolerance. Token details are displayed, and a confirmation notification is sent via SMS or email.
+
+Outlet Requesting Gas Cylinders from the Head Office
+Outlet managers log in to the system to request gas cylinder stocks from the head office. They input the required quantities based on local demand, and the system records their request. Once submitted, the request is sent to the head office for review. The outlet manager receives a notification confirming the submission and is informed that the final allocation will be decided by the head office.
+
+Determining the Quantity of Cylinders per Outlet
+At the head office, staff log in to the system to review requests from all outlets. They evaluate each request by considering factors such as previous sales data, current stock levels at the head office, and regional demand trends. After assessing all requests, the staff revise or approve the requested quantities to optimize distribution across outlets. The final quantities are entered into the system, and delivery schedules are generated. Outlet managers are notified of the approved quantities and expected delivery times, enabling them to prepare for receiving the stock.
+
+Notification and Delivery
+When the dispatch office confirms a delivery schedule for an outlet, all token holders receive an SMS or email notification, reminding them to bring their empty cylinders and payment by a specified date. If a customer cannot meet this deadline, the outlet manager contacts them via SMS, email, or phone call to inform them about reallocation of the gas to another customer.
+
+Industrial and Business Requests
+GasByGas caters to industrial and business clients separately. These clients must register and validate their certification to ensure compliance. Upon successful validation, their gas requests are processed under a distinct category.
+
+Outlet and Head Office Operations
+Outlet managers use the system to verify tokens and customer details. They mark requests as fulfilled when empties and payments are received, updating the system accordingly. Meanwhile, the head office monitors the status of all outlets, managing the supply chain and ensuring smooth operations across the island.
+
+Final Touches
+A day before the scheduled delivery, all token holders receive a reminder to collect their gas cylinders. This proactive communication ensures timely pickups and efficient distribution. Security remains a top priority, safeguarding customer data and system integrity.
