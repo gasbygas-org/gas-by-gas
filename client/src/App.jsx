@@ -18,6 +18,8 @@ const GasRequestForm = lazy(() => import('./components/GasRequestForm'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const OutletManagerDashboard = lazy(() => import('./pages/OutletManagerDashboard'));
+const BusinessDashboard = lazy(() => import('./pages/BusinessDashboard'));
 
 
 // Loading component
@@ -144,6 +146,38 @@ const AnimatedRoutes = () => {
               transition={{ duration: 0.3 }}
             >
               <AdminDashboard />
+            </m.div>
+          } 
+        />
+
+        {/* Outlet Manager routes */}
+        <Route 
+          path="outletmanager" 
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <OutletManagerDashboard />
+            </m.div>
+          } 
+        />
+
+        {/* Business routes */}
+        <Route 
+          path="business" 
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <BusinessDashboard />
             </m.div>
           } 
         />

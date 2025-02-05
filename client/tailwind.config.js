@@ -11,6 +11,10 @@ export default {
         'spin-slow': 'spin 3s linear infinite',
         'pulse-slow': 'pulse 3s linear infinite',
       },
+      colors: {
+        gradientStart: '#6EE7B7',
+        gradientEnd: '#3B82F6',
+      },
       keyframes: {
         shimmer: {
           '100%': { transform: 'translateX(100%)' },

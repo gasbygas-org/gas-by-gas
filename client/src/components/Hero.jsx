@@ -44,7 +44,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="relative overflow-hidden min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Enhanced Background Effects */}
       <div className="absolute inset-0">
         {/* Primary gradient background */}
@@ -64,7 +64,7 @@ const Hero = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-24 md:py-32 relative z-10">
+      <div className="container relative z-10 px-4 py-24 mx-auto md:py-32">
         <m.div 
           variants={containerVariants}
           initial="hidden"
@@ -74,34 +74,34 @@ const Hero = () => {
           {/* Hero Content */}
           <m.div 
             variants={itemVariants}
-            className="text-center space-y-8 mb-16"
+            className="mb-16 space-y-8 text-center"
           >
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold">
-              <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold md:text-6xl lg:text-7xl">
+              <span className="text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text">
                 GasByGas
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className="max-w-3xl mx-auto text-lg text-gray-300 md:text-xl">
               Seamless gas delivery with real-time tracking. Your trusted energy partner.
             </p>
             
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Link to="/request">
                 <m.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl font-semibold text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 flex items-center gap-2 w-full sm:w-auto justify-center group"
+                  className="flex items-center justify-center w-full gap-2 px-8 py-4 font-semibold text-white transition-all duration-300 shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-blue-500/25 hover:shadow-blue-500/40 sm:w-auto group"
                 >
                   Request Gas Now
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </m.button>
               </Link>
               <Link to="/dashboard">
                 <m.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-gray-800/50 backdrop-blur-sm rounded-2xl font-semibold text-gray-300 border border-gray-700 hover:bg-gray-800/70 transition-all duration-300 w-full sm:w-auto"
+                  className="w-full px-8 py-4 font-semibold text-gray-300 transition-all duration-300 border border-gray-700 bg-gray-800/50 backdrop-blur-sm rounded-2xl hover:bg-gray-800/70 sm:w-auto"
                 >
                   Track Delivery
                 </m.button>
@@ -112,20 +112,19 @@ const Hero = () => {
           {/* Features Grid */}
           <m.div 
             variants={containerVariants}
-            className="grid md:grid-cols-3 gap-6 md:gap-8"
+            className="grid gap-6 md:grid-cols-3 md:gap-8"
           >
             {features.map((feature, index) => (
               <m.div
                 key={index}
                 variants={itemVariants}
                 whileHover={{ y: -5, scale: 1.02 }}
-                className="backdrop-blur-xl bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50 
-                  hover:shadow-2xl transition-all duration-300"
+                className="p-8 transition-all duration-300 border shadow-2xl backdrop-blur-xl bg-gray-800/30 rounded-3xl border-gray-700/50 hover:shadow-2xl"
               >
                 <div className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${feature.color} p-4 flex items-center justify-center text-white mb-6 shadow-lg`}>
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-3">
+                <h3 className="mb-3 text-xl font-semibold text-white">
                   {feature.title}
                 </h3>
                 <p className="text-gray-400">
@@ -138,7 +137,7 @@ const Hero = () => {
           {/* Stats Section */}
           <m.div 
             variants={containerVariants}
-            className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 text-center"
+            className="grid grid-cols-2 gap-6 mt-20 text-center md:grid-cols-4"
           >
             {[
               { value: '10K+', label: 'Active Users' },
@@ -150,13 +149,12 @@ const Hero = () => {
                 key={index}
                 variants={itemVariants}
                 whileHover={{ y: -5, scale: 1.02 }}
-                className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50 
-                  hover:shadow-2xl transition-all duration-300"
+                className="p-6 transition-all duration-300 border shadow-2xl backdrop-blur-xl bg-gray-800/30 rounded-3xl border-gray-700/50 hover:shadow-2xl"
               >
-                <h4 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                <h4 className="text-2xl font-bold text-transparent md:text-3xl bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text">
                   {stat.value}
                 </h4>
-                <p className="text-gray-400 text-sm md:text-base">{stat.label}</p>
+                <p className="text-sm text-gray-400 md:text-base">{stat.label}</p>
               </m.div>
             ))}
           </m.div>

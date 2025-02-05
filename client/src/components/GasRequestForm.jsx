@@ -130,20 +130,20 @@ const GasRequestForm = () => {
     
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen px-4 py-12 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 sm:px-6 lg:px-8">
             {/* Background pattern */}
             <div className="fixed inset-0 -z-10">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40" />
             </div>
 
             <div className="max-w-md mx-auto">
-                <div className="backdrop-blur-xl bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50">
-                    <h2 className="text-3xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
+                <div className="p-8 border shadow-2xl backdrop-blur-xl bg-gray-800/30 rounded-3xl border-gray-700/50">
+                    <h2 className="mb-8 text-3xl font-bold text-transparent bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text">
                         Request Gas
                     </h2>
 
                     {error && (
-                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl flex items-center text-red-400">
+                        <div className="flex items-center p-4 mb-6 text-red-400 border bg-red-500/10 border-red-500/50 rounded-xl">
                             <AlertCircle className="w-5 h-5 mr-2" />
                             {error}
                         </div>
@@ -152,7 +152,7 @@ const GasRequestForm = () => {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Gas Type Selection */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <label className="block mb-2 text-sm font-medium text-gray-300">
                                 Gas Type
                             </label>
                             <select
@@ -174,7 +174,7 @@ const GasRequestForm = () => {
 
                         {/* Quantity Input */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <label className="block mb-2 text-sm font-medium text-gray-300">
                                 Quantity
                             </label>
                             <input
@@ -188,8 +188,8 @@ const GasRequestForm = () => {
                                 required
                             />
                             {checking ? (
-                                <div className="mt-2 text-blue-400 text-sm flex items-center">
-                                    <div className="w-4 h-4 border-t-2 border-b-2 border-current rounded-full animate-spin mr-2" />
+                                <div className="flex items-center mt-2 text-sm text-blue-400">
+                                    <div className="w-4 h-4 mr-2 border-t-2 border-b-2 border-current rounded-full animate-spin" />
                                     Checking availability...
                                 </div>
                             ) : (
@@ -199,7 +199,7 @@ const GasRequestForm = () => {
 
                         {/* Outlet Selection */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <label className="block mb-2 text-sm font-medium text-gray-300">
                                 Select Outlet
                             </label>
                             <select

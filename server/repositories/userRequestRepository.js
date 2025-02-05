@@ -1,5 +1,4 @@
 const db = require('../config/db'); 
-
 class UserRequestRepository {
     constructor(db) {
         this.db = db;
