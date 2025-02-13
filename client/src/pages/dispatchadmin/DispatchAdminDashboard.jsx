@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, ArrowLeft, Users, Package, ShoppingCart, Briefcase } from 'lucide-react';
 
-const AdminDashboard = () => {
+const DispatchAdminDashboard = () => {
     const navigate = useNavigate();
 
     // Static data extracted from gasbygas.sql
@@ -50,7 +50,7 @@ const AdminDashboard = () => {
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
-                                Admin Dashboard
+                                Dispatch Admin Dashboard
                             </span>
                         </div>
                         <div className="flex items-center space-x-4">
@@ -76,37 +76,10 @@ const AdminDashboard = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <div className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50">
                                 <div className="flex items-center space-x-4">
-                                    <Users className="w-8 h-8 text-blue-400" />
-                                    <div>
-                                        <p className="text-gray-300">User Registrations</p>
-                                        <p className="text-2xl font-bold">{users.length}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50">
-                                <div className="flex items-center space-x-4">
                                     <Package className="w-8 h-8 text-blue-400" />
                                     <div>
                                         <p className="text-gray-300">Outlet Requests</p>
                                         <p className="text-2xl font-bold">{outletRequests.length}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50">
-                                <div className="flex items-center space-x-4">
-                                    <ShoppingCart className="w-8 h-8 text-blue-400" />
-                                    <div>
-                                        <p className="text-gray-300">Consumer Requests</p>
-                                        <p className="text-2xl font-bold">{consumerRequests.length}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50">
-                                <div className="flex items-center space-x-4">
-                                    <Briefcase className="w-8 h-8 text-blue-400" />
-                                    <div>
-                                        <p className="text-gray-300">Business Requests</p>
-                                        <p className="text-2xl font-bold">{businessRequests.length}</p>
                                     </div>
                                 </div>
                             </div>
@@ -119,34 +92,16 @@ const AdminDashboard = () => {
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <a
-                                href="/admin/user-management"
+                                href="/dispatch/delivery-management"
                                 className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50 hover:bg-gray-800/40 transition-all duration-200"
                             >
                                 <div className="flex items-center space-x-4">
                                     <Users className="w-8 h-8 text-blue-400" />
-                                    <p className="text-gray-300">User Management</p>
+                                    <p className="text-gray-300">Delivery Management</p>
                                 </div>
                             </a>
                             <a
-                                href="/admin/outlet-management"
-                                className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50 hover:bg-gray-800/40 transition-all duration-200"
-                            >
-                                <div className="flex items-center space-x-4">
-                                    <Package className="w-8 h-8 text-blue-400" />
-                                    <p className="text-gray-300">Outlet Management</p>
-                                </div>
-                            </a>
-                            <a
-                                href="/admin/stock-management"
-                                className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50 hover:bg-gray-800/40 transition-all duration-200"
-                            >
-                                <div className="flex items-center space-x-4">
-                                    <ShoppingCart className="w-8 h-8 text-blue-400" />
-                                    <p className="text-gray-300">Stock Management</p>
-                                </div>
-                            </a>
-                            <a
-                                href="/admin/reports"
+                                href="/dispatch/reports"
                                 className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50 hover:bg-gray-800/40 transition-all duration-200"
                             >
                                 <div className="flex items-center space-x-4">
@@ -164,4 +119,4 @@ const AdminDashboard = () => {
     );
 };
 
-export default AdminDashboard;
+export default DispatchAdminDashboard;
