@@ -1,36 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, ArrowLeft, Users, Package, ShoppingCart, Briefcase } from 'lucide-react';
+import { LogOut, ArrowLeft, Package, ShoppingCart, MessageCircle, FileText } from 'lucide-react';
 
-const AdminDashboard = () => {
+const OutletManagerDashboard = () => {
     const navigate = useNavigate();
-
-    // Static data extracted from gasbygas.sql
-    const users = [
-        { id: 1, name: 'GBG User', role: 'user' },
-        { id: 2, name: 'GBG Admin', role: 'admin' },
-        { id: 3, name: 'GBG Dispatch Admin', role: 'dispatch_admin' },
-        { id: 4, name: 'GBG Outlet Manager', role: 'outlet_manager' },
-        { id: 5, name: 'GBG Business', role: 'business' }
-    ];
-
-    const outletRequests = [
-        { id: 1, outlet_id: 1, request_status: 'Pending' },
-        { id: 2, outlet_id: 2, request_status: 'Approved' },
-        { id: 3, outlet_id: 3, request_status: 'Delivered' }
-    ];
-
-    const consumerRequests = [
-        { id: 1, user_id: 1, request_status: 'Pending' },
-        { id: 2, user_id: 1, request_status: 'Approved' },
-        { id: 3, user_id: 5, request_status: 'Delivered' }
-    ];
-
-    const businessRequests = [
-        { id: 1, user_id: 5, request_status: 'Pending' },
-        { id: 2, user_id: 5, request_status: 'Approved' },
-        { id: 3, user_id: 5, request_status: 'Delivered' }
-    ];
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -50,7 +23,7 @@ const AdminDashboard = () => {
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
-                                Admin Dashboard
+                                Outlet Manager Dashboard
                             </span>
                         </div>
                         <div className="flex items-center space-x-4">
@@ -76,19 +49,10 @@ const AdminDashboard = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <div className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50">
                                 <div className="flex items-center space-x-4">
-                                    <Users className="w-8 h-8 text-blue-400" />
-                                    <div>
-                                        <p className="text-gray-300">User Registrations</p>
-                                        <p className="text-2xl font-bold">{users.length}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50">
-                                <div className="flex items-center space-x-4">
                                     <Package className="w-8 h-8 text-blue-400" />
                                     <div>
                                         <p className="text-gray-300">Outlet Requests</p>
-                                        <p className="text-2xl font-bold">{outletRequests.length}</p>
+                                        <p className="text-2xl font-bold">3</p>
                                     </div>
                                 </div>
                             </div>
@@ -96,17 +60,26 @@ const AdminDashboard = () => {
                                 <div className="flex items-center space-x-4">
                                     <ShoppingCart className="w-8 h-8 text-blue-400" />
                                     <div>
-                                        <p className="text-gray-300">Consumer Requests</p>
-                                        <p className="text-2xl font-bold">{consumerRequests.length}</p>
+                                        <p className="text-gray-300">Customer Requests</p>
+                                        <p className="text-2xl font-bold">5</p>
                                     </div>
                                 </div>
                             </div>
                             <div className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50">
                                 <div className="flex items-center space-x-4">
-                                    <Briefcase className="w-8 h-8 text-blue-400" />
+                                    <MessageCircle className="w-8 h-8 text-blue-400" />
                                     <div>
-                                        <p className="text-gray-300">Business Requests</p>
-                                        <p className="text-2xl font-bold">{businessRequests.length}</p>
+                                        <p className="text-gray-300">Messages</p>
+                                        <p className="text-2xl font-bold">2</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50">
+                                <div className="flex items-center space-x-4">
+                                    <FileText className="w-8 h-8 text-blue-400" />
+                                    <div>
+                                        <p className="text-gray-300">Reports</p>
+                                        <p className="text-2xl font-bold">1</p>
                                     </div>
                                 </div>
                             </div>
@@ -119,38 +92,38 @@ const AdminDashboard = () => {
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <a
-                                href="/admin/user-management"
-                                className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50 hover:bg-gray-800/40 transition-all duration-200"
-                            >
-                                <div className="flex items-center space-x-4">
-                                    <Users className="w-8 h-8 text-blue-400" />
-                                    <p className="text-gray-300">User Management</p>
-                                </div>
-                            </a>
-                            <a
-                                href="/admin/outlet-management"
+                                href="/outlet/outlet-requests"
                                 className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50 hover:bg-gray-800/40 transition-all duration-200"
                             >
                                 <div className="flex items-center space-x-4">
                                     <Package className="w-8 h-8 text-blue-400" />
-                                    <p className="text-gray-300">Outlet Management</p>
+                                    <p className="text-gray-300">Outlet Request Management</p>
                                 </div>
                             </a>
                             <a
-                                href="/admin/stock-management"
+                                href="/outlet/customer-requests"
                                 className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50 hover:bg-gray-800/40 transition-all duration-200"
                             >
                                 <div className="flex items-center space-x-4">
                                     <ShoppingCart className="w-8 h-8 text-blue-400" />
-                                    <p className="text-gray-300">Stock Management</p>
+                                    <p className="text-gray-300">Customer Request Management</p>
                                 </div>
                             </a>
                             <a
-                                href="/admin/reports"
+                                href="/outlet/stocks"
                                 className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50 hover:bg-gray-800/40 transition-all duration-200"
                             >
                                 <div className="flex items-center space-x-4">
-                                    <Briefcase className="w-8 h-8 text-blue-400" />
+                                    <ShoppingCart className="w-8 h-8 text-blue-400" />
+                                    <p className="text-gray-300">Stocks</p>
+                                </div>
+                            </a>
+                            <a
+                                href="/outlet/reports"
+                                className="backdrop-blur-xl bg-gray-800/30 p-6 rounded-3xl shadow-2xl border border-gray-700/50 hover:bg-gray-800/40 transition-all duration-200"
+                            >
+                                <div className="flex items-center space-x-4">
+                                    <FileText className="w-8 h-8 text-blue-400" />
                                     <p className="text-gray-300">Reports</p>
                                 </div>
                             </a>
@@ -164,4 +137,4 @@ const AdminDashboard = () => {
     );
 };
 
-export default AdminDashboard;
+export default OutletManagerDashboard;

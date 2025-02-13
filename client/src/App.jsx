@@ -36,6 +36,35 @@ const LoadingScreen = () => (
 
 // Layout component to handle Navbar and Footer visibility
 import PropTypes from 'prop-types';
+// user pages
+import UserDash from './pages/user/UserDashboard';
+import RequestGas from './pages/user/RequestGas';
+import GasRequests from './pages/user/GasRequests';
+import Notification from './pages/user/NotificationPage';
+import UserReports from './pages/user/Reports';
+// admin pages
+import AdminDash from './pages/admin/AdminDashboard';
+import UserManagement from './pages/admin/UserManagement';
+import OutletManagement from './pages/admin/OutletManagement';
+import StockManagement from './pages/admin/StockManagement';
+import AdminReports from './pages/admin/Reports';
+// dispatch admin pages
+import DispatchDash from './pages/dispatchadmin/DispatchAdminDashboard';
+import DeliveryManagement from './pages/dispatchadmin/DeliveryManagement';
+import DispatchReports from './pages/dispatchadmin/Reports';
+// outlet manager pages
+import OutletDash from './pages/outletmanager/OutletManagerDashboard';
+import OutletRequestManagement from './pages/outletmanager/OutletRequestManagement';
+import CustomerRequestManagement from './pages/outletmanager/CustomerRequestManagement';
+import OutletStocks from './pages/outletmanager/Stocks';
+import OutletReports from './pages/outletmanager/Reports';
+// business pages
+import BusinessDash from './pages/business/BusinessDashboard';
+import BusinessRegistration from './pages/business/BusinessRegistration';
+import BusinessRequestGas from './pages/business/RequestGas';
+import BusinessGasRequests from './pages/business/GasRequests';
+import BusinessNotifications from './pages/business/Notifications';
+import BusinessReports from './pages/business/Reports';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -84,28 +113,369 @@ const AnimatedRoutes = () => {
   const DashboardComponent = () => {
     // Add a check for userData loading
     if (!userData) {
-        return null; // or a loading component
+      return null; // or a loading component
     }
 
     // Check role from userData
     const userRole = userData.role;
     console.log('Current user role:', userRole);
 
-    if (userRole === 'user') {
-        return <Dashboard />;
-    } else if (userRole === 'admin') {
-        return <Navigate to="/admin/dashboard" replace />;
-    }
-    
+    // if (userRole === 'user') {
+    return <Dashboard />;
+    // } else if (userRole === 'admin') {
+    // return <Navigate to="/admin/dashboard" replace />;
+    // }
+
     return <Navigate to="/login" />;
-};
+  };
 
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route 
-          path="/" 
+        <Route
+          path="/business/dashboard"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <BusinessDash />
+            </m.div>
+          }
+        />
+        <Route
+          path="/business/registration"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <BusinessRegistration />
+            </m.div>
+          }
+        />
+        <Route
+          path="/business/request-gas"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <BusinessRequestGas />
+            </m.div>
+          }
+        />
+        <Route
+          path="/business/gas-requests"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <BusinessGasRequests />
+            </m.div>
+          }
+        />
+        <Route
+          path="/business/notifications"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <BusinessNotifications />
+            </m.div>
+          }
+        />
+        <Route
+          path="/business/reports"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <BusinessReports />
+            </m.div>
+          }
+        />
+
+        <Route
+          path="/outlet/dashboard"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <OutletDash />
+            </m.div>
+          }
+        />
+        <Route
+          path="/outlet/outlet-requests"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <OutletRequestManagement />
+            </m.div>
+          }
+        />
+        <Route
+          path="/outlet/customer-requests"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <CustomerRequestManagement />
+            </m.div>
+          }
+        />
+        <Route
+          path="/outlet/stocks"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <OutletStocks />
+            </m.div>
+          }
+        />
+        <Route
+          path="/outlet/reports"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <OutletReports />
+            </m.div>
+          }
+        />
+
+        <Route
+          path="/dispatch/dashboard"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <DispatchDash />
+            </m.div>
+          }
+        />
+        <Route
+          path="/dispatch/delivery-management"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <DeliveryManagement />
+            </m.div>
+          }
+        />
+        <Route
+          path="/dispatch/reports"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <DispatchReports />
+            </m.div>
+          }
+        />
+
+        <Route
+          path="/admin/dashboard"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <AdminDash />
+            </m.div>
+          }
+        />
+        <Route
+          path="/admin/user-management"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <UserManagement />
+            </m.div>
+          }
+        />
+        <Route
+          path="/admin/outlet-management"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <OutletManagement />
+            </m.div>
+          }
+        />
+        <Route
+          path="/admin/stock-management"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <StockManagement />
+            </m.div>
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <AdminReports />
+            </m.div>
+          }
+        />
+
+        <Route
+          path="/user/dashboard"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <UserDash />
+            </m.div>
+          }
+        />
+        <Route
+          path="/user/request-gas"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <RequestGas />
+            </m.div>
+          }
+        />
+        <Route
+          path="/user/gas-requests"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <GasRequests />
+            </m.div>
+          }
+        />
+        <Route
+          path="/user/notifications"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <Notification />
+            </m.div>
+          }
+        />
+        <Route
+          path="/user/reports"
+          element={
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <UserReports />
+            </m.div>
+          }
+        />
+
+        <Route
+          path="/"
           element={
             <m.div
               variants={pageVariants}
@@ -116,11 +486,11 @@ const AnimatedRoutes = () => {
             >
               <Home />
             </m.div>
-          } 
+          }
         />
         {/* Updated Dashboard route */}
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
             <m.div
               variants={pageVariants}
@@ -131,12 +501,12 @@ const AnimatedRoutes = () => {
             >
               <DashboardComponent />
             </m.div>
-          } 
+          }
         />
 
         {/* Admin Dashboard route */}
-        <Route 
-          path="/admin/dashboard" 
+        <Route
+          path="/admin/dashboard"
           element={
             <m.div
               variants={pageVariants}
@@ -147,12 +517,12 @@ const AnimatedRoutes = () => {
             >
               <AdminDashboard />
             </m.div>
-          } 
+          }
         />
 
         {/* Outlet Manager routes */}
-        <Route 
-          path="outletmanager" 
+        <Route
+          path="outletmanager"
           element={
             <m.div
               variants={pageVariants}
@@ -163,12 +533,12 @@ const AnimatedRoutes = () => {
             >
               <OutletManagerDashboard />
             </m.div>
-          } 
+          }
         />
 
         {/* Business routes */}
-        <Route 
-          path="business" 
+        <Route
+          path="business"
           element={
             <m.div
               variants={pageVariants}
@@ -179,11 +549,11 @@ const AnimatedRoutes = () => {
             >
               <BusinessDashboard />
             </m.div>
-          } 
+          }
         />
 
-        <Route 
-          path="/login" 
+        <Route
+          path="/login"
           element={
             <m.div
               variants={pageVariants}
@@ -194,35 +564,35 @@ const AnimatedRoutes = () => {
             >
               <Login />
             </m.div>
-          } 
+          }
         />
-        <Route 
-          path="/register" 
+        <Route
+          path="/register"
           element={
-              <m.div
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={{ duration: 0.3 }}
-              >
-                  <Register />
-              </m.div>
-          } 
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <Register />
+            </m.div>
+          }
         />
-        <Route 
-          path="/request-gas" 
+        <Route
+          path="/request-gas"
           element={
-              <m.div
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={{ duration: 0.3 }}
-              >
-                  <GasRequestForm />
-              </m.div>
-          } 
+            <m.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <GasRequestForm />
+            </m.div>
+          }
         />
         <Route path="*" element={<NotFound />} />
       </Routes>
