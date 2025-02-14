@@ -6,7 +6,7 @@ import API from '../api/config';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { m } from 'framer-motion';
 import AnimatedInput from '../components/AnimatedInput';
-import AnimatedAlert from '../components/AnimatedAlert'; 
+import AnimatedAlert from '../components/AnimatedAlert';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ const Login = () => {
         if (!formData.password) newErrors.password = 'Password is required';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-      };
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -49,6 +49,7 @@ const Login = () => {
             console.log('Making API request...');
             const response = await API.post('/auth/login', {
                 email: formData.email,
+                password: formData.password,
                 uid: userCredential.user.uid,
                 token: idToken
             });
@@ -57,7 +58,7 @@ const Login = () => {
                 throw new Error('No response data received');
             }
 
-            if (response.data.success) {
+            if (response.status === 200) {
                 console.log('Login successful, redirecting...');
                 localStorage.setItem('user', JSON.stringify(response.data.user));
                 localStorage.setItem('token', response.data.token);
@@ -71,15 +72,24 @@ const Login = () => {
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 // Role-based navigation
-                switch(response.data.user.role) {
+                switch (response.data.user.role) {
                     case 'admin':
                         navigate('/admin/dashboard');
                         break;
                     case 'user':
-                        navigate('/dashboard');
+                        navigate('/user/dashboard');
+                        break;
+                    case 'outlet_manager':
+                        navigate('/outlet/dashboard');
+                        break;
+                    case 'dispatch_admin':
+                        navigate('/dispatch/dashboard');
+                        break;
+                    case 'business':
+                        navigate('/business/dashboard');
                         break;
                     default:
-                        navigate('/dashboard');
+                        navigate('/');
                 }
             }
         } catch (error) {
@@ -119,29 +129,29 @@ const Login = () => {
                     )}
 
                     <form onSubmit={handleSubmit} className={`space-y-6 transition-opacity duration-200 ${isSubmitting ? 'opacity-50' : ''}`}>
-                      <AnimatedInput
-                          type="email"
-                          placeholder="Email"
-                          value={formData.email}
-                          onChange={(e) => setFormData({...formData, email: e.target.value})}
-                          error={errors.email}
-                          className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
+                        <AnimatedInput
+                            type="email"
+                            placeholder="Email"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            error={errors.email}
+                            className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
                               focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
                               text-gray-200 placeholder-gray-500"
-                          required
-                      />
-                      
-                      <AnimatedInput
-                          type="password"
-                          placeholder="Password"
-                          value={formData.password}
-                          onChange={(e) => setFormData({...formData, password: e.target.value})}
-                          error={errors.password}
-                          className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
+                            required
+                        />
+
+                        <AnimatedInput
+                            type="password"
+                            placeholder="Password"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            error={errors.password}
+                            className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
                               focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
                               text-gray-200 placeholder-gray-500"
-                          required
-                      />
+                            required
+                        />
 
                         <button
                             type="submit"
@@ -163,14 +173,14 @@ const Login = () => {
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
                                 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
                         </button>
-                  </form>
+                    </form>
 
-                  {/* Navigation Links */}
-                  <div className="mt-6 text-center">
+                    {/* Navigation Links */}
+                    <div className="mt-6 text-center">
                         <p className="text-gray-400">
                             Don&apos;t have an account?{' '}
-                            <Link 
-                                to="/register" 
+                            <Link
+                                to="/register"
                                 className="text-blue-400 hover:text-blue-300 transition-colors duration-150"
                             >
                                 Create Account
@@ -179,7 +189,7 @@ const Login = () => {
                     </div>
 
                     <div className="mt-4 text-center">
-                        <Link 
+                        <Link
                             to="/"
                             className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-300 
                                 transition-colors duration-150 border border-gray-700 rounded-lg 

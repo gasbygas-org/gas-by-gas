@@ -13,11 +13,11 @@ const Navbar = () => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 0);
         };
-    
+
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-    
+
 
     useEffect(() => {
         const user = localStorage.getItem('user');
@@ -35,7 +35,7 @@ const Navbar = () => {
     // Role-based navigation links
     const getNavLinks = () => {
         const commonLinks = [
-            { name: 'Home', path: '/' }
+            // { name: 'Home', path: '/' }
         ];
 
         if (!userData) {
@@ -50,20 +50,29 @@ const Navbar = () => {
             case 'admin':
                 return [
                     ...commonLinks,
-                    { name: 'Admin Dashboard', path: '/admin/dashboard' },
-                    { name: 'User Management', path: '/admin/users' },
+                    { name: 'Dashboard', path: '/admin/dashboard' },
+                    // { name: 'User Management', path: '/admin/user-management' },
                 ];
-            case 'outletmanager':
+            case 'outlet_manager':
                 return [
                     ...commonLinks,
-                    { name: 'Manager Dashboard', path: '/manager/dashboard' },
-                    { name: 'Gas Requests', path: '/manager/requests' },
+                    { name: 'Dashboard', path: '/outlet/dashboard' },
+                    // { name: 'Gas Requests', path: '/outlet/requests' },
+                ];
+            case 'dispatch_admin':
+                return [
+                    ...commonLinks,
+                    { name: 'Dashboard', path: '/dispatch/dashboard' },
                 ];
             case 'user':
                 return [
                     ...commonLinks,
-                    { name: 'Dashboard', path: '/dashboard' },
-                    { name: 'Request Gas', path: '/request' },
+                    { name: 'Dashboard', path: '/user/dashboard' },
+                ];
+            case 'business':
+                return [
+                    ...commonLinks,
+                    { name: 'Dashboard', path: '/business/dashboard' },
                 ];
             default:
                 return commonLinks;
@@ -71,11 +80,10 @@ const Navbar = () => {
     };
 
     return (
-        <nav className={`fixed w-full z-50 transition-all duration-300 ${
-            isScrolled 
-                ? 'backdrop-blur-md bg-gray-900/50 border-b border-gray-800' 
-                : 'bg-transparent'
-        }`}>
+        <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled
+            ? 'backdrop-blur-md bg-gray-900/50 border-b border-gray-800'
+            : 'bg-transparent'
+            }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo and brand */}
@@ -92,20 +100,20 @@ const Navbar = () => {
                                 <Link
                                     key={link.path}
                                     to={link.path}
-                                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-md font-medium transition-colors"
                                 >
                                     {link.name}
                                 </Link>
                             ))}
                             {userData && (
                                 <div className="flex items-center space-x-4">
-                                    <div className="text-sm text-gray-300">
+                                    <div className="flex items-center text-md text-gray-300">
                                         <User className="inline-block w-4 h-4 mr-1" />
                                         {userData.name}
                                     </div>
                                     <button
                                         onClick={handleLogout}
-                                        className="flex items-center text-red-400 hover:text-red-300 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                        className="flex items-center text-red-400 hover:text-red-300 px-3 py-2 rounded-md text-md font-medium transition-colors"
                                     >
                                         <LogOut className="w-4 h-4 mr-1" />
                                         Logout

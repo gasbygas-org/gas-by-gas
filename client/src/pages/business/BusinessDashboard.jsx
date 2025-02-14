@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LogOut, Package, Mail, FileText } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { LogOut, Package, Mail, FileText, User } from 'lucide-react';
 
 const BusinessDashboard = () => {
     const navigate = useNavigate();
@@ -22,6 +22,8 @@ const BusinessDashboard = () => {
         navigate('/login');
     };
 
+    const user = JSON.parse(localStorage.getItem('user'));
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-gray-100">
             <div className="fixed inset-0">
@@ -39,6 +41,23 @@ const BusinessDashboard = () => {
                                 </span>
                             </div>
                             <div className="flex items-center space-x-4">
+                                {/* Home Link */}
+                                <Link
+                                    to="/"
+                                    className="flex items-center text-gray-300 hover:text-white px-3 py-2 rounded-md text-md font-medium transition-colors"
+                                >
+                                    Home
+                                </Link>
+
+                                {/* User Name */}
+                                {user && (
+                                    <div className="flex items-center text-md text-gray-300">
+                                        <User className="inline-block w-4 h-4 mr-1" />
+                                        {user.name}
+                                    </div>
+                                )}
+
+                                {/* Logout Button */}
                                 <button
                                     onClick={handleLogout}
                                     className="inline-flex items-center px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/50 rounded-xl hover:bg-red-500/20 transition-all duration-200"
