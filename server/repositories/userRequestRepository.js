@@ -1,8 +1,9 @@
-const db = require('../config/db'); 
+const db = require('../config/db');
 class UserRequestRepository {
     constructor(db) {
         this.db = db;
     }
+
     // Get outlet gas availability
     async getOutletGasAvailability(outletId, gasTypeId) {
         const [result] = await db.query(
@@ -12,10 +13,10 @@ class UserRequestRepository {
              WHERE stocks.outlet_id = ? AND stock_details.gas_type_id = ?`,
             [outletId, gasTypeId]
         );
-        return result[0]; 
+        return result[0];
     }
-    
-// Get scheduled delivery for a specific outlet and gas type
+
+    // Get scheduled delivery for a specific outlet and gas type
     async getScheduledDelivery(outletId, gasTypeId) {
         const [result] = await db.query(
             `SELECT d.id AS deliveryId, dd.quantity AS deliveryQuantity
@@ -24,8 +25,9 @@ class UserRequestRepository {
              WHERE d.outlet_id = ? AND dd.gas_type_id = ? AND d.status = 'Scheduled'`,
             [outletId, gasTypeId]
         );
-        return result[0]; 
+        return result[0];
     }
+
     // Create a user request
     async createUserRequest({ userId, outletId, gasTypeId, quantity, token, deliveryDate, pickupPeriodStart, pickupPeriodEnd }) {
         const [result] = await db.query(
@@ -36,6 +38,7 @@ class UserRequestRepository {
         );
         return result.insertId;
     }
+
     // Get pending user requests for a specific outlet and gas type
     async getPendingUserRequests(outletId, gasTypeId) {
         try {
@@ -52,10 +55,11 @@ class UserRequestRepository {
             throw new Error("Unable to fetch pending user requests.");
         }
     }
+
     // Get user request by ID
     async getUserRequestById(requestId) {
         const query = `
-            SELECT outlet_id, user_id, gas_type_id, quantity, request_status
+            SELECT outlet_id, user_id, gas_type_id, quantity, request_status, token, delivery_date, pickup_period_start, pickup_period_end
             FROM user_requests
             WHERE id = ?
         `;
@@ -65,16 +69,15 @@ class UserRequestRepository {
 
     // Get outlet stock for a specific gas type
     async getOutletStock(outletId, gasTypeId) {
-    const query = `
+        const query = `
         SELECT sd.quantity
         FROM stocks s
         INNER JOIN stock_details sd ON s.id = sd.stock_id
         WHERE s.outlet_id = ? AND sd.gas_type_id = ?
     `;
-    const [rows] = await db.execute(query, [outletId, gasTypeId]);
-    return rows[0]?.quantity || 0;
-}
-
+        const [rows] = await db.execute(query, [outletId, gasTypeId]);
+        return rows[0]?.quantity || 0;
+    }
 
     // Update user request status
     async updateUserRequestStatus(requestId, status) {
@@ -86,17 +89,26 @@ class UserRequestRepository {
         await db.execute(query, [status, requestId]);
     }
 
+    // Update user request status
+    async updateUserRequestAllocation(requestId, newUserId) {
+        const query = `
+            UPDATE user_requests
+            SET user_id = ?
+            WHERE id = ?
+        `;
+        await db.execute(query, [newUserId, requestId]);
+    }
+
     // Update outlet stock by reducing the quantity
     async updateOutletStock(outletId, gasTypeId, quantity) {
-    const query = `
+        const query = `
         UPDATE stock_details sd
         INNER JOIN stocks s ON s.id = sd.stock_id
         SET sd.quantity = sd.quantity - ?
         WHERE s.outlet_id = ? AND sd.gas_type_id = ?
     `;
-    await db.execute(query, [quantity, outletId, gasTypeId]);
-}
-
+        await db.execute(query, [quantity, outletId, gasTypeId]);
+    }
 
     // Create a notification for the user
     async createNotification(userId, message) {

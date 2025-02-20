@@ -150,6 +150,7 @@ exports.login = async (req, res) => {
                 address: userRecord.address,
                 nic: userRecord.nic,
                 id: userRecord.id,
+                outletId: userRecord.outletId,
             }
         });
 
