@@ -84,12 +84,38 @@ class UserRepository {
 
         return { users, totalCount };
     }
+    async getGasRequestCustomers(/*offset, limit*/) {
+        const query = `
+        SELECT u.id, u.name, u.email, u.nic, r.role_name 
+        FROM users u
+        INNER JOIN roles r ON u.role_id = r.id
+        WHERE r.role_name IN ('user', 'business')
+    `;
+
+        const countQuery = `
+        SELECT COUNT(*) AS totalCount 
+        FROM users u
+        INNER JOIN roles r ON u.role_id = r.id
+        WHERE r.role_name IN ('user', 'business');
+    `;
+
+        const [users] = await this.db.query(query/*, [limit, offset]*/);
+        const [[{ totalCount }]] = await this.db.query(countQuery);
+
+        return { users, totalCount };
+    }
     async getUserById(userId) {
         const [result] = await this.db.execute('SELECT id, email FROM users WHERE id = ?', [userId]);
         return result[0];
     }
     async getUserByEmail(userEmail) {
-        const [result] = await this.db.execute('SELECT id, email, nic, name, phone, address FROM users WHERE email = ?', [userEmail]);
+        const [result] = await this.db.execute(
+            `SELECT u.id, u.email, u.nic, u.name, u.phone, u.address, o.id AS outletId 
+            FROM users u 
+            LEFT JOIN outlets o ON u.id = o.manager_id
+            WHERE u.email = ?`,
+            [userEmail]
+        );
         return result[0];
     }
 

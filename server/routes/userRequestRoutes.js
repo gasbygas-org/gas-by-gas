@@ -1,5 +1,13 @@
 const express = require('express');
-const { requestGas, approveRequest, markAsDelivered, getUserRequests } = require('../controllers/userRequestController');
+const {
+    requestGas,
+    approveRequest,
+    markAsDelivered,
+    getUserRequests,
+    cancelRequest,
+    rejectRequest,
+    reallocateRequest,
+} = require('../controllers/userRequestController');
 const verifyToken = require('../middlewares/authMiddleware');
 
 const router = express.Router();
@@ -15,5 +23,11 @@ router.post('/gas/delivered', verifyToken, markAsDelivered);
 
 // Route for fetching user requests with pagination and filters
 router.get('/gas/requests', verifyToken, getUserRequests);
+
+router.post('/gas/cancel', verifyToken, cancelRequest);
+
+router.post('/gas/reject', verifyToken, rejectRequest);
+
+router.post('/gas/reallocate', verifyToken, reallocateRequest);
 
 module.exports = router;

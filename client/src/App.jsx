@@ -14,13 +14,41 @@ import Footer from './components/Footer';
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
-const GasRequestForm = lazy(() => import('./components/GasRequestForm'));
 const NotFound = lazy(() => import('./pages/NotFound'));
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const OutletManagerDashboard = lazy(() => import('./pages/OutletManagerDashboard'));
-const BusinessDashboard = lazy(() => import('./pages/BusinessDashboard'));
 
+// User pages
+const UserDash = lazy(() => import('./pages/user/UserDashboard'));
+const RequestGas = lazy(() => import('./pages/user/RequestGas'));
+const GasRequests = lazy(() => import('./pages/user/GasRequests'));
+const Notification = lazy(() => import('./pages/user/NotificationPage'));
+const UserReports = lazy(() => import('./pages/user/Reports'));
+
+// Admin pages
+const AdminDash = lazy(() => import('./pages/admin/AdminDashboard'));
+const UserManagement = lazy(() => import('./pages/admin/UserManagement'));
+const OutletManagement = lazy(() => import('./pages/admin/OutletManagement'));
+const StockManagement = lazy(() => import('./pages/admin/StockManagement'));
+const AdminReports = lazy(() => import('./pages/admin/Reports'));
+
+// Dispatch admin pages
+const DispatchDash = lazy(() => import('./pages/dispatchadmin/DispatchAdminDashboard'));
+const DeliveryManagement = lazy(() => import('./pages/dispatchadmin/DeliveryManagement'));
+const DispatchReports = lazy(() => import('./pages/dispatchadmin/Reports'));
+
+// Outlet manager pages
+const OutletDash = lazy(() => import('./pages/outletmanager/OutletManagerDashboard'));
+const OutletRequestManagement = lazy(() => import('./pages/outletmanager/OutletRequestManagement'));
+const CustomerRequestManagement = lazy(() => import('./pages/outletmanager/CustomerRequestManagement'));
+const OutletStocks = lazy(() => import('./pages/outletmanager/Stocks'));
+const OutletReports = lazy(() => import('./pages/outletmanager/Reports'));
+
+// Business pages
+const BusinessDash = lazy(() => import('./pages/business/BusinessDashboard'));
+const BusinessRegistration = lazy(() => import('./pages/business/BusinessRegistration'));
+const BusinessRequestGas = lazy(() => import('./pages/business/RequestGas'));
+const BusinessGasRequests = lazy(() => import('./pages/business/GasRequests'));
+const BusinessNotifications = lazy(() => import('./pages/business/Notifications'));
+const BusinessReports = lazy(() => import('./pages/business/Reports'));
 
 // Loading component
 const LoadingScreen = () => (
@@ -80,32 +108,39 @@ const AnimatedRoutes = () => {
     }
   };
 
-  // Updated DashboardComponent
-  const DashboardComponent = () => {
-    // Add a check for userData loading
-    if (!userData) {
-        return null; // or a loading component
+  const isLoggedIn = () => {
+    // return userData !== null;
+
+    const storedUser = localStorage.getItem('user');
+
+    if (storedUser) {
+      return true;
     }
 
-    // Check role from userData
-    const userRole = userData.role;
-    console.log('Current user role:', userRole);
+    return false;
+  };
 
-    if (userRole === 'user') {
-        return <Dashboard />;
-    } else if (userRole === 'admin') {
-        return <Navigate to="/admin/dashboard" replace />;
+  const hasRole = (requiredRole) => {
+    // return userData && userData.role === requiredRole;
+
+    const storedUser = localStorage.getItem('user');
+
+    return storedUser && JSON.parse(storedUser).role === requiredRole;
+  };
+
+  const RoleRestrictedRoute = ({ requiredRole, element }) => {
+    if (!isLoggedIn() || !hasRole(requiredRole)) {
+      return <Navigate to="/not-found" />;
     }
-    
-    return <Navigate to="/login" />;
-};
-
+    return element;
+  };
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route 
-          path="/" 
+        {/* Home route - always accessible */}
+        <Route
+          path="/"
           element={
             <m.div
               variants={pageVariants}
@@ -116,114 +151,514 @@ const AnimatedRoutes = () => {
             >
               <Home />
             </m.div>
-          } 
-        />
-        {/* Updated Dashboard route */}
-        <Route 
-          path="/dashboard" 
-          element={
-            <m.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.3 }}
-            >
-              <DashboardComponent />
-            </m.div>
-          } 
+          }
         />
 
-        {/* Admin Dashboard route */}
-        <Route 
-          path="/admin/dashboard" 
+        {/* Login and Register routes - only accessible when not logged in */}
+        <Route
+          path="/login"
           element={
-            <m.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.3 }}
-            >
-              <AdminDashboard />
-            </m.div>
-          } 
+            isLoggedIn() ? (
+              <Navigate to="/" />
+            ) : (
+              <m.div
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.3 }}
+              >
+                <Login />
+              </m.div>
+            )
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            isLoggedIn() ? (
+              <Navigate to="/" />
+            ) : (
+              <m.div
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.3 }}
+              >
+                <Register />
+              </m.div>
+            )
+          }
         />
 
-        {/* Outlet Manager routes */}
-        <Route 
-          path="outletmanager" 
+        {/* User routes */}
+        <Route
+          path="/user/dashboard"
           element={
-            <m.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.3 }}
-            >
-              <OutletManagerDashboard />
-            </m.div>
-          } 
+            <RoleRestrictedRoute
+              requiredRole="user"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <UserDash />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/user/request-gas"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="user"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <RequestGas />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/user/gas-requests"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="user"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <GasRequests />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/user/notifications"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="user"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <Notification />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/user/reports"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="user"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <UserReports />
+                </m.div>
+              }
+            />
+          }
+        />
+
+        {/* Admin routes */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="admin"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <AdminDash />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/admin/user-management"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="admin"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <UserManagement />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/admin/outlet-management"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="admin"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <OutletManagement />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/admin/stock-management"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="admin"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <StockManagement />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="admin"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <AdminReports />
+                </m.div>
+              }
+            />
+          }
+        />
+
+        {/* Dispatch admin routes */}
+        <Route
+          path="/dispatch/dashboard"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="dispatch_admin"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <DispatchDash />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/dispatch/delivery-management"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="dispatch_admin"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <DeliveryManagement />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/dispatch/reports"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="dispatch_admin"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <DispatchReports />
+                </m.div>
+              }
+            />
+          }
+        />
+
+        {/* Outlet manager routes */}
+        <Route
+          path="/outlet/dashboard"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="outlet_manager"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <OutletDash />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/outlet/outlet-requests"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="outlet_manager"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <OutletRequestManagement />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/outlet/customer-requests"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="outlet_manager"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <CustomerRequestManagement />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/outlet/stocks"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="outlet_manager"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <OutletStocks />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/outlet/reports"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="outlet_manager"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <OutletReports />
+                </m.div>
+              }
+            />
+          }
         />
 
         {/* Business routes */}
-        <Route 
-          path="business" 
+        <Route
+          path="/business/dashboard"
           element={
-            <m.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.3 }}
-            >
-              <BusinessDashboard />
-            </m.div>
-          } 
+            <RoleRestrictedRoute
+              requiredRole="business"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <BusinessDash />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/business/registration"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="business"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <BusinessRegistration />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/business/request-gas"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="business"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <BusinessRequestGas />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/business/gas-requests"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="business"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <BusinessGasRequests />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/business/notifications"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="business"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <BusinessNotifications />
+                </m.div>
+              }
+            />
+          }
+        />
+        <Route
+          path="/business/reports"
+          element={
+            <RoleRestrictedRoute
+              requiredRole="business"
+              element={
+                <m.div
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                >
+                  <BusinessReports />
+                </m.div>
+              }
+            />
+          }
         />
 
-        <Route 
-          path="/login" 
-          element={
-            <m.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.3 }}
-            >
-              <Login />
-            </m.div>
-          } 
-        />
-        <Route 
-          path="/register" 
-          element={
-              <m.div
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={{ duration: 0.3 }}
-              >
-                  <Register />
-              </m.div>
-          } 
-        />
-        <Route 
-          path="/request-gas" 
-          element={
-              <m.div
-                  variants={pageVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={{ duration: 0.3 }}
-              >
-                  <GasRequestForm />
-              </m.div>
-          } 
-        />
+        {/* Not Found route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>
@@ -231,8 +666,8 @@ const AnimatedRoutes = () => {
 };
 
 const App = () => {
-
   const [user, setUser] = useState(null);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);

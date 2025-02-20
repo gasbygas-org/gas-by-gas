@@ -4,6 +4,7 @@ import { auth } from '../firebase.config';
 import { Link, useNavigate } from 'react-router-dom';
 import API from '../api/config';
 import LoadingSpinner from '../components/LoadingSpinner';
+import AnimatedAlert from '../components/AnimatedAlert';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -21,11 +22,13 @@ const Register = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [status, setStatus] = useState({ type: '', message: '' });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
+        setStatus({ type: '', message: '' });
 
         // Basic validation
         if (formData.password !== formData.confirmPassword) {
@@ -35,20 +38,19 @@ const Register = () => {
         }
 
         try {
-
             console.log('1. Starting registration with data:', formData);
             // 1. Create Firebase Auth account
-            const userCredential = await createUserWithEmailAndPassword(
-                auth, 
-                formData.email, 
-                formData.password
-            );
+            // const userCredential = await createUserWithEmailAndPassword(
+            //     auth, 
+            //     formData.email, 
+            //     formData.password
+            // );
 
-            console.log('2. Firebase Auth account created:', userCredential.user.uid);
+            // console.log('2. Firebase Auth account created:', userCredential.user.uid);
 
             // 2. Get Firebase token
-            const idToken = await userCredential.user.getIdToken();
-            console.log('3. Got Firebase token');
+            // const idToken = await userCredential.user.getIdToken();
+            // console.log('3. Got Firebase token');
 
             // 3. Send all user data to backend
             const response = await API.post('/auth/register', {
@@ -59,17 +61,22 @@ const Register = () => {
                 name: formData.name,
                 address: formData.address,
                 role: 'user',
-                uid: userCredential.user.uid,
-                token: idToken
-            });            
+                // uid: userCredential.user.uid,
+                // token: idToken
+            });
 
             console.log('4. Backend response:', response.data);
+            console.log(response);
 
-            if (response.data.success) {
+            if (response.status === 201) {
+                setStatus({
+                    type: 'success',
+                    message: 'Register successful! Redirecting...'
+                });
+
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 navigate('/login');
             }
-
         } catch (error) {
             console.error('Registration error:', error);
             if (error.code === 'auth/email-already-in-use') {
@@ -95,6 +102,11 @@ const Register = () => {
                         Create Account
                     </h2>
 
+                    <AnimatedAlert
+                        type={status.type}
+                        message={status.message}
+                    />
+
                     {error && (
                         <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-xl mb-6">
                             {error}
@@ -106,18 +118,18 @@ const Register = () => {
                             type="email"
                             placeholder="Email"
                             value={formData.email}
-                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
                                 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
                                 text-gray-200 placeholder-gray-500"
                             required
                         />
-                        
+
                         <input
                             type="password"
                             placeholder="Password"
                             value={formData.password}
-                            onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
                                 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
                                 text-gray-200 placeholder-gray-500"
@@ -128,7 +140,7 @@ const Register = () => {
                             type="password"
                             placeholder="Confirm Password"
                             value={formData.confirmPassword}
-                            onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                             className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
                                 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
                                 text-gray-200 placeholder-gray-500"
@@ -139,7 +151,7 @@ const Register = () => {
                             type="text"
                             placeholder="Full Name"
                             value={formData.name}
-                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
                                 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
                                 text-gray-200 placeholder-gray-500"
@@ -150,7 +162,7 @@ const Register = () => {
                             type="text"
                             placeholder="NIC"
                             value={formData.nic}
-                            onChange={(e) => setFormData({...formData, nic: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, nic: e.target.value })}
                             className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
                                 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
                                 text-gray-200 placeholder-gray-500"
@@ -161,7 +173,7 @@ const Register = () => {
                             type="tel"
                             placeholder="Phone Number"
                             value={formData.phone}
-                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                             className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
                                 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
                                 text-gray-200 placeholder-gray-500"
@@ -171,7 +183,7 @@ const Register = () => {
                         <textarea
                             placeholder="Address"
                             value={formData.address}
-                            onChange={(e) => setFormData({...formData, address: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                             className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
                                 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
                                 text-gray-200 placeholder-gray-500"
@@ -203,8 +215,8 @@ const Register = () => {
                         <div className="mt-6 text-center">
                             <p className="text-gray-400">
                                 Already have an account?{' '}
-                                <Link 
-                                    to="/login" 
+                                <Link
+                                    to="/login"
                                     className="text-blue-400 hover:text-blue-300 transition-colors duration-150"
                                 >
                                     Login
@@ -213,7 +225,7 @@ const Register = () => {
                         </div>
 
                         <div className="mt-4 text-center">
-                            <Link 
+                            <Link
                                 to="/"
                                 className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-300 
                                     transition-colors duration-150 border border-gray-700 rounded-lg 

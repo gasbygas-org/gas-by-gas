@@ -51,3 +51,30 @@ exports.getAdminsAndStockManagers = async (req, res) => {
         });
     }
 };
+
+exports.getGasRequestCustomers = async (req, res) => {
+    // const { page = 1, limit = 10 } = req.query;
+
+    try {
+        // const offset = (page - 1) * limit;
+
+        const { users, totalCount } = await adminUserRepository.getGasRequestCustomers(/*offset, parseInt(limit)*/);
+
+        // const totalPages = Math.ceil(totalCount / limit);
+        const totalPages = 1;
+
+        res.status(200).json({
+            // currentPage: parseInt(page),
+            currentPage: parseInt(1),
+            totalPages,
+            totalUsers: totalCount,
+            users,
+        });
+    } catch (error) {
+        console.error("Error fetching gas request customers:", error);
+        res.status(500).json({
+            message: "Failed to fetch gas request customers.",
+            error: error.message,
+        });
+    }
+};
