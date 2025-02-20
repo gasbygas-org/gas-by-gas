@@ -64,7 +64,7 @@ exports.requestGas = async (req, res) => {
         });
 
         await transporter.sendMail({
-            from: '"Bodo App" <3treecrops2@gmail.com>',
+            from: '"GasByGas App" <3treecrops2@gmail.com>',
             to: email,
             subject: 'Gas Request Token Confirmation',
             html: `
@@ -137,7 +137,7 @@ exports.approveRequest = async (req, res) => {
             await userRequestRepository.updateOutletStock(outlet_id, gas_type_id, quantity);
 
             await transporter.sendMail({
-                from: '"Bodo App" <3treecrops2@gmail.com>',
+                from: '"GasByGas App" <3treecrops2@gmail.com>',
                 to: email,
                 subject: 'Gas Request Approved and Delivered',
                 html: `
@@ -161,7 +161,7 @@ exports.approveRequest = async (req, res) => {
 
             // Send email notification
             await transporter.sendMail({
-                from: '"Bodo App" <3treecrops2@gmail.com>',
+                from: '"GasByGas App" <3treecrops2@gmail.com>',
                 to: email,
                 subject: 'Gas Request Approved - Awaiting Stock',
                 html: `
@@ -220,7 +220,7 @@ exports.markAsDelivered = async (req, res) => {
         await userRequestRepository.updateOutletStock(outlet_id, gas_type_id, -quantity);
 
         await transporter.sendMail({
-            from: '"Bodo App" <3treecrops2@gmail.com>',
+            from: '"GasByGas App" <3treecrops2@gmail.com>',
             to: email,
             subject: 'Gas Request Dilivered',
             html: `
@@ -236,6 +236,170 @@ exports.markAsDelivered = async (req, res) => {
         console.error("Error marking request as delivered:", error);
         return res.status(500).json({
             message: "An error occurred while processing the delivery request.",
+            error: error.message,
+        });
+    }
+};
+exports.cancelRequest = async (req, res) => {
+    const { requestId } = req.body;
+
+    if (!requestId) {
+        return res.status(400).json({ message: "Request ID is required." });
+    }
+
+    try {
+        const userRequest = await userRequestRepository.getUserRequestById(requestId);
+        if (!userRequest) {
+            return res.status(404).json({ message: "User request not found." });
+        }
+
+        const { user_id, outlet_id, gas_type_id, quantity, request_status } = userRequest;
+
+        if (request_status !== 'Pending') {
+            return res.status(400).json({ message: "Only pending requests can be cancelled." });
+        }
+
+        const user = await userRepository.getUserById(user_id);
+        if (!user || !user.email) {
+            return res.status(404).json({ message: "User not found or email not available." });
+        }
+
+        await userRequestRepository.updateUserRequestStatus(requestId, 'Cancelled');
+
+        await transporter.sendMail({
+            from: '"GasByGas App" <3treecrops2@gmail.com>',
+            to: user.email,
+            subject: 'Gas Request Cancelled',
+            html: `
+                <h1>Your Gas Request Has Been Cancelled</h1>
+                <p>Your request for ${quantity} units of gas has been cancelled.</p>
+                <p>Thank you for using our service!</p>
+                <p>If you have any questions, contact support at <a href="mailto:3treecrops2@gmail.com">3treecrops2@gmail.com</a>.</p>
+            `,
+        });
+
+        return res.status(200).json({ message: "Request marked as cancelled." });
+    } catch (error) {
+        console.error("Error marking request as cancelled:", error);
+        return res.status(500).json({
+            message: "An error occurred while processing the gas request.",
+            error: error.message,
+        });
+    }
+};
+exports.rejectRequest = async (req, res) => {
+    const { requestId } = req.body;
+
+    if (!requestId) {
+        return res.status(400).json({ message: "Request ID is required." });
+    }
+
+    try {
+        const userRequest = await userRequestRepository.getUserRequestById(requestId);
+        if (!userRequest) {
+            return res.status(404).json({ message: "User request not found." });
+        }
+
+        const { user_id, outlet_id, gas_type_id, quantity, request_status } = userRequest;
+
+        if (request_status !== 'Pending') {
+            return res.status(400).json({ message: "Only pending requests can be rejected." });
+        }
+
+        const user = await userRepository.getUserById(user_id);
+        if (!user || !user.email) {
+            return res.status(404).json({ message: "User not found or email not available." });
+        }
+
+        await userRequestRepository.updateUserRequestStatus(requestId, 'Rejected');
+
+        await transporter.sendMail({
+            from: '"GasByGas App" <3treecrops2@gmail.com>',
+            to: user.email,
+            subject: 'Gas Request Rejected',
+            html: `
+                <h1>Your Gas Request Has Been Rejected</h1>
+                <p>Your request for ${quantity} units of gas has been rejected.</p>
+                <p>Thank you for using our service!</p>
+                <p>If you have any questions, contact support at <a href="mailto:3treecrops2@gmail.com">3treecrops2@gmail.com</a>.</p>
+            `,
+        });
+
+        return res.status(200).json({ message: "Request marked as rejected." });
+    } catch (error) {
+        console.error("Error marking request as rejected:", error);
+        return res.status(500).json({
+            message: "An error occurred while processing the gas request.",
+            error: error.message,
+        });
+    }
+};
+exports.reallocateRequest = async (req, res) => {
+    const { requestId, newUserId, message } = req.body;
+
+    if (!requestId) {
+        return res.status(400).json({ message: "Request ID is required." });
+    }
+
+    try {
+        const userRequest = await userRequestRepository.getUserRequestById(requestId);
+        if (!userRequest) {
+            return res.status(404).json({ message: "User request not found." });
+        }
+
+        const { user_id, outlet_id, gas_type_id, quantity, request_status, token, delivery_date, pickup_period_start, pickup_period_end } = userRequest;
+
+        if (request_status !== 'Pending') {
+            return res.status(400).json({ message: "Only pending requests can be re-allocated to another user." });
+        }
+
+        const oldUser = await userRepository.getUserById(user_id);
+        if (!oldUser || !oldUser.email) {
+            return res.status(404).json({ message: "Old user not found or email not available." });
+        }
+
+        const newUser = await userRepository.getUserById(newUserId);
+        if (!newUser || !newUser.email) {
+            return res.status(404).json({ message: "New user not found or email not available." });
+        }
+
+        await userRequestRepository.updateUserRequestAllocation(requestId, newUserId);
+
+        await transporter.sendMail({
+            from: '"GasByGas App" <3treecrops2@gmail.com>',
+            to: oldUser.email,
+            subject: 'Gas Request Allocation Revoked',
+            html: `
+                <h1>Your Gas Request Allocation Has Been Revoked</h1>
+                <p>Your request for ${quantity} units of gas has been revoked and re-allocated to another customer after prior communication with you.</p>
+                ${message ? `<p>Outlet Manager's Comment: ${message}</p>` : ''}
+                <p>Thank you for using our service!</p>
+                <p>If you have any questions, contact support at <a href="mailto:3treecrops2@gmail.com">3treecrops2@gmail.com</a>.</p>
+            `,
+        });
+
+        await transporter.sendMail({
+            from: '"GasByGas App" <3treecrops2@gmail.com>',
+            to: newUser.email,
+            subject: 'Gas Request Token Confirmation',
+            html: `
+                <h1>Gas Request Token Confirmation</h1>
+                <p>Thank you for your gas request. Here are your token details:</p>
+                <ul>
+                    <li><strong>Token:</strong> ${token}</li>
+                    <li><strong>Delivery Date:</strong> ${delivery_date.toISOString().split('T')[0]}</li>
+                    <li><strong>Pickup Period:</strong> ${pickup_period_start.toISOString().split('T')[0]} - ${pickup_period_end.toISOString().split('T')[0]}</li>
+                </ul>
+                <p>Please save this information for future reference.</p>
+                <p>If you have any questions, contact support at <a href="mailto:3treecrops2@gmail.com">3treecrops2@gmail.com</a>.</p>
+            `,
+        });
+
+        return res.status(200).json({ message: "Request re-allocated to new user successfully." });
+    } catch (error) {
+        console.error("Error re-allocating request to new user:", error);
+        return res.status(500).json({
+            message: "An error occurred while processing the re-allocation request.",
             error: error.message,
         });
     }
@@ -283,7 +447,9 @@ exports.getUserRequests = async (req, res) => {
         const query = `
             SELECT 
                 ur.id, ur.user_id, ur.outlet_id, ur.gas_type_id, ur.quantity, ur.request_status,
-                ur.created_at, ur.token, ur.delivery_date, ur.pickup_period_start, ur.pickup_period_end,
+                DATE_FORMAT(ur.created_at, '%Y-%m-%d %H:%i:%s') AS created_at,
+                DATE_FORMAT(ur.updated_at, '%Y-%m-%d %H:%i:%s') AS updated_at, 
+                ur.token, ur.delivery_date, ur.pickup_period_start, ur.pickup_period_end,
                 users.email AS user_email, users.nic AS user_nic,
                 CONCAT(outlets.outlet_name, ', ', outlets.district) AS outlet,
                 gas_types.gas_type_name AS gas_type

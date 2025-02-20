@@ -1,72 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Info, LogOut, ArrowLeft } from 'lucide-react';
-import axios from 'axios';
+import apiClient from '../../api/apiClient';
 
 const RequestGas = () => {
     const navigate = useNavigate();
+    const [outlets, setOutlets] = useState([]);
+    const [gasTypes, setGasTypes] = useState([]);
     const [stockInfo, setStockInfo] = useState({});
-    const [checking, setChecking] = useState(false);
-    const [stockError, setStockError] = useState('');
     const [formData, setFormData] = useState({
         gasTypeId: '',
         quantity: 1,
-        outletId: ''
+        outletId: '',
+        userId: JSON.parse(localStorage.getItem('user'))?.id
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Hardcoded data for outlets and gas types
-    const outlets = [
-        { id: 1, outlet_name: 'City Gas Outlet' },
-        { id: 2, outlet_name: 'Suburban Gas Shop' },
-        { id: 3, outlet_name: 'Kandy Gas Depot' }
-    ];
-
-    const gasTypes = [
-        { id: 1, gas_type_name: '12.5 kg Domestic' },
-        { id: 2, gas_type_name: '5 kg Domestic' },
-        { id: 3, gas_type_name: '37.5 kg Commercial' }
-    ];
-
-    const checkStock = (outletId, gasTypeId, quantity) => {
-        const availableStock = {
-            1: { 1: 20, 2: 10 },
-            2: { 1: 15, 3: 5 },
-            3: { 1: 25 }
+    useEffect(() => {
+        const fetchOutlets = async () => {
+            try {
+                const response = await apiClient.get('/api/outlet', {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                });
+                setOutlets(response.data);
+            } catch (err) {
+                console.error('Error fetching outlets:', err);
+            }
         };
 
-        if (availableStock[outletId] && availableStock[outletId][gasTypeId] >= quantity) {
-            setStockInfo({ isAvailable: true, availableQuantity: availableStock[outletId][gasTypeId] });
-            return true;
-        } else {
-            setStockInfo({ isAvailable: false, availableQuantity: availableStock[outletId]?.[gasTypeId] || 0 });
-            return false;
-        }
-    };
+        const fetchGasTypes = async () => {
+            try {
+                const response = await apiClient.get('/api/gas-types', {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                });
+                setGasTypes(response.data);
+            } catch (err) {
+                console.error('Error fetching gas types:', err);
+            }
+        };
+
+        fetchOutlets();
+        fetchGasTypes();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
-        // Check stock availability before submitting
-        const isStockAvailable = checkStock(formData.outletId, formData.gasTypeId, formData.quantity);
-        if (!isStockAvailable) {
-            setError('Insufficient stock available.');
-            setLoading(false);
-            return;
-        }
-
         try {
-            const response = await axios.post('http://localhost:5000/api/gas', formData);
-            // Handle success response
+            const response = await apiClient.post(
+                '/api/request/gas',
+                formData,
+                {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                }
+            );
+
             alert('Gas request submitted successfully!');
-            navigate('/');
+            navigate('/user/gas-requests');
         } catch (err) {
             setError('Failed to submit request. Please try again.');
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
     };
 
@@ -77,7 +74,7 @@ const RequestGas = () => {
     };
 
     const handleBackToDashboard = () => {
-        navigate('/user/dashboard'); // Navigate back to the user dashboard
+        navigate('/user/dashboard');
     };
 
     const StockInfo = ({ info }) => {
@@ -200,7 +197,7 @@ const RequestGas = () => {
                                 />
                             </div>
 
-                            <StockInfo info={stockInfo} />
+                            {/* <StockInfo info={stockInfo} /> */}
 
                             <button
                                 type="submit"
@@ -214,7 +211,6 @@ const RequestGas = () => {
                 </main>
             </div>
 
-            {/* Radial gradient for hover effects */}
             <div className="fixed inset-0 pointer-events-none radial-gradient opacity-30" />
         </div>
     );
