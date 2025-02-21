@@ -44,6 +44,16 @@ class OutletRepository {
         const query = `UPDATE outlets SET status = 'DELETED' WHERE id = ?;`;
         await this.db.query(query, [id]);
     }
+    
+    async getAllOutletsWithManager() {
+        const query = `
+            SELECT o.id, o.outlet_name, o.address, o.district, o.phone, u.name AS manager_name, o.created_at, o.updated_at
+            FROM outlets o
+            LEFT JOIN users u ON o.manager_id = u.id;
+        `;
+        const [outlets] = await this.db.query(query);
+        return outlets;
+    }
 
 }
 

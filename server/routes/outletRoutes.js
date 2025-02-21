@@ -5,6 +5,7 @@ const {
     getOutletById,
     deleteOutlet,
     getAllOutlets,
+    getAllOutletsWithManager
 } = require('../controllers/outletController');
 const verifyToken = require('../middlewares/authMiddleware')
 
@@ -24,5 +25,7 @@ router.get('/:id', verifyToken, getOutletById);
 
 // Delete an outlet by ID
 router.delete('/delete/:id', verifyToken, deleteOutlet);
+
+router.get('/outlets/with-managers', getAllOutletsWithManager);
 
 module.exports = router;

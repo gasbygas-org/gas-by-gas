@@ -97,3 +97,16 @@ exports.getAllOutlets = async (req, res) => {
         });
     }
 };
+// Get all outlets with their manager names
+exports.getAllOutletsWithManager = async (req, res) => {
+    try {
+        const outlets = await outletRepository.getAllOutletsWithManager();
+        res.status(200).json(outlets);
+    } catch (error) {
+        console.error('Error fetching outlets with manager names:', error);
+        res.status(500).json({
+            message: 'Failed to fetch outlets with manager names',
+            error: error.message
+        });
+    }
+};

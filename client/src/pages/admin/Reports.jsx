@@ -10,34 +10,44 @@ const Reports = () => {
     const [activeReport, setActiveReport] = useState('user-registration');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-    const [users, setUsers] = useState([]);  // State to store fetched users
-    const [loading, setLoading] = useState(false);  // State to handle loading state
-    const [error, setError] = useState(null);  // State to handle errors
-
-    // Fetch users data from API when component mounts
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [outlets, setOutlets] = useState([]);
+    const [error, setError] = useState(null); 
+  
     useEffect(() => {
         const fetchUsers = async () => {
-            setLoading(true);  // Set loading to true before API call
+            setLoading(true);  
             try {
                 const response = await API.get('user/users/all');
-                setUsers(response.data);  // Update state with API response
+                setUsers(response.data);  
             } catch (err) {
-                setError('Failed to fetch users data');  // Handle error if API call fails
+                setError('Failed to fetch users data');  
                 console.error('Error fetching users:', err);
             } finally {
-                setLoading(false);  // Set loading to false after API call
+                setLoading(false); 
             }
         };
 
         fetchUsers();
-    }, []);  // Empty dependency array means this runs once when component mounts
+    }, []); 
 
+    useEffect(() => {
+        const fetchOutlets = async () => {
+            setLoading(true);
+            try {
+                const response = await API.get('outlet/outlets/with-managers'); 
+                setOutlets(response.data);
+            } catch (err) {
+                setError('Failed to fetch outlets data');
+                console.error('Error fetching outlets:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const outlets = [
-        { id: 1, outlet_name: 'City Gas Outlet', address: '10 Station Road, Colombo', district: 'Colombo', phone: '0112777333', manager_id: 4, created_at: '2025-01-29 18:25:10', updated_at: '2025-01-30 08:38:37' },
-        { id: 2, outlet_name: 'Suburban Gas Shop', address: '25 High Street, Dehiwala', district: 'Colombo', phone: '0112888444', manager_id: 4, created_at: '2025-01-29 18:25:10', updated_at: '2025-01-30 08:38:40' },
-        { id: 3, outlet_name: 'Kandy Gas Depot', address: '5 Temple Road, Kandy', district: 'Kandy', phone: '0812999555', manager_id: 4, created_at: '2025-01-29 18:25:10', updated_at: '2025-01-30 08:38:44' }
-    ];
+        fetchOutlets();
+    }, []); 
 
     const stocks = [
         { id: 1, outlet_id: 1, gas_type_id: 1, quantity: 50, created_at: '2025-01-29 18:25:45', updated_at: '2025-01-29 18:25:45' },
@@ -285,9 +295,7 @@ const Reports = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{outlet.address}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{outlet.district}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{outlet.phone}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                                {users.find((user) => user.id === outlet.manager_id)?.name || 'N/A'}
-                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{outlet.manager_name}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{outlet.created_at}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{outlet.updated_at}</td>
                                         </tr>
