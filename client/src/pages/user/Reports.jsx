@@ -175,14 +175,14 @@ useEffect(() => {
                                 className="px-4 py-2 bg-gray-900/50 border border-gray-700/50 rounded-xl"
                                 placeholder="End Date"
                             />
-                            <button
+                            {/* <button
                                 onClick={handleDownloadReport}
                                 className="inline-flex items-center px-4 py-2 bg-blue-500/10 text-blue-400 
                                     border border-blue-500/50 rounded-xl hover:bg-blue-500/20 transition-all duration-200"
                             >
                                 <Download className="w-4 h-4 mr-2" />
                                 Download Report
-                            </button>
+                            </button> */}
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">
