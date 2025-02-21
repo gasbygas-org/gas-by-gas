@@ -20,13 +20,34 @@ const BusinessRegistration = () => {
     ]);
 
     const [file, setFile] = useState(null);
+    const [organizationName, setOrganizationName] = useState('');
+    const [notification, setNotification] = useState('');
+    const [errors, setErrors] = useState({
+        organizationName: '',
+        file: '',
+    });
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
+        setErrors({ ...errors, file: '' }); 
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!organizationName) newErrors.organizationName = 'Organization Name is required';
+        if (!file) newErrors.file = 'File is required';
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = () => {
-        console.log('File submitted:', file);
+        if (!validateForm()) return;
+
+        if (file) {
+            setNotification('File uploaded successfully! The organization certification is under review.');
+        } else {
+            setNotification('Please select a file to upload.');
+        }
     };
 
     return (
@@ -74,8 +95,14 @@ const BusinessRegistration = () => {
                                     type="text"
                                     className="mt-1 block w-full bg-gray-700/50 border border-gray-600/50 rounded-md shadow-sm text-gray-100 p-2"
                                     placeholder="Enter organization name"
+                                    value={organizationName}
+                                    onChange={(e) => setOrganizationName(e.target.value)}
                                 />
+                                {errors.organizationName && (
+                                    <p className="text-red-500 text-sm">{errors.organizationName}</p>
+                                )}
                             </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-300">Upload/Re-upload Certificate</label>
                                 <div className="mt-1 flex items-center">
@@ -86,13 +113,22 @@ const BusinessRegistration = () => {
                                         onChange={handleFileChange}
                                     />
                                 </div>
+                                {errors.file && <p className="text-red-500 text-sm">{errors.file}</p>}
                             </div>
+
                             <button
                                 onClick={handleSubmit}
                                 className="inline-flex items-center px-4 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/50 rounded-xl hover:bg-blue-500/20 transition-all duration-200"
                             >
                                 Submit
                             </button>
+
+                            {/* Notification */}
+                            {notification && (
+                                <div className="mt-4 bg-blue-500/10 text-blue-500 px-4 py-3 rounded-xl">
+                                    {notification}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </main>
