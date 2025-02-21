@@ -276,5 +276,97 @@ class StockRepository {
         return result.affectedRows > 0;
     }
 
+    // Create a new stock entry
+    async createStock(outletId) {
+        const query = `
+            INSERT INTO stocks (outlet_id) 
+            VALUES (?);
+        `;
+        const [result] = await this.db.query(query, [outletId]);
+        return result.insertId;
+    }
+
+    // Add stock details
+    async createStockDetail(stockId, gasTypeId, quantity) {
+        const query = `
+            INSERT INTO stock_details (stock_id, gas_type_id, quantity) 
+            VALUES (?, ?, ?);
+        `;
+        await this.db.query(query, [stockId, gasTypeId, quantity]);
+    }
+
+    // Get all stocks with search and filter
+    async getAllStocks(query, gasTypeId) {
+        const filters = [];
+        const params = [];
+
+        if (query) {
+            filters.push("(o.outlet_name LIKE ? OR o.address LIKE ? OR o.district LIKE ?)");
+            params.push(`%${query}%`, `%${query}%`, `%${query}%`);
+        }
+
+        if (gasTypeId) {
+            filters.push("sd.gas_type_id = ?");
+            params.push(gasTypeId);
+        }
+
+        const whereClause = filters.length > 0 ? `WHERE ${filters.join(" AND ")}` : "";
+
+        const queryStatement = `
+            SELECT 
+                s.id AS stock_id,
+                o.id AS outlet_id,
+                o.outlet_name,
+                o.address,
+                o.district,
+                gt.id AS gas_type_id,
+                gt.gas_type_name,
+                sd.quantity,
+                s.created_at,
+                s.updated_at
+            FROM 
+                stocks AS s
+            INNER JOIN 
+                outlets AS o ON s.outlet_id = o.id
+            INNER JOIN 
+                stock_details AS sd ON s.id = sd.stock_id
+            INNER JOIN 
+                gas_types AS gt ON sd.gas_type_id = gt.id
+            ${whereClause}
+            ORDER BY s.id DESC;
+        `;
+
+        const [results] = await this.db.query(queryStatement, params);
+        return results;
+    }
+
+    // Update stock quantity
+    async updateStockDetail(stockId, gasTypeId, quantity) {
+        const query = `
+            UPDATE stock_details 
+            SET quantity = ? 
+            WHERE stock_id = ? AND gas_type_id = ?;
+        `;
+        await this.db.query(query, [quantity, stockId, gasTypeId]);
+    }
+
+    // Delete stock
+    async deleteStock(stockId) {
+        const query = `
+            DELETE FROM stocks 
+            WHERE id = ?;
+        `;
+        await this.db.query(query, [stockId]);
+    }
+
+    // Delete stock details
+    async deleteStockDetails(stockId) {
+        const query = `
+            DELETE FROM stock_details 
+            WHERE stock_id = ?;
+        `;
+        await this.db.query(query, [stockId]);
+    }
 }
+
 module.exports = StockRepository;

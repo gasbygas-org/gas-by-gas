@@ -6,6 +6,10 @@ const {
     updateGasRequestAndStock,
     cancelGasRequest,
     getAllGasRequests,
+    createStock,
+    getAllStocks,
+    updateStock,
+    deleteStock,
 } = require('../controllers/stockController');
 const verifyToken = require('../middlewares/authMiddleware')
 const { app } = require("firebase-admin");
@@ -27,5 +31,18 @@ router.patch('/request/status', verifyToken, approveGasRequest);
 router.patch('/request/:requestId/status', verifyToken, updateGasRequestAndStock);
 
 router.patch('/request/:requestId/cancel', verifyToken, cancelGasRequest);
+
+// Admin
+// Create a new stock entry
+router.post("/stocks", verifyToken, createStock);
+
+// Get all stocks with search and filter
+router.get("/stocks", verifyToken, getAllStocks);
+
+// Update stock quantity
+router.put("/stocks", verifyToken, updateStock);
+
+// Delete stock
+router.delete("/stocks/:stockId", verifyToken, deleteStock);
 
 module.exports = router;
