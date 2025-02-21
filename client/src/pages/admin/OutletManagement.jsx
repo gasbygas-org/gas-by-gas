@@ -23,6 +23,7 @@ const OutletManagement = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
     const [newOutlet, setNewOutlet] = useState({ outlet_name: '', address: '', district: '', phone: '', manager_id: '' });
+    const [error, setError] = useState('');
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -34,13 +35,59 @@ const OutletManagement = () => {
         navigate('/admin/dashboard');
     };
 
+    const validateForm = () => {
+        const { outlet_name, address, district, phone, manager_id } = newOutlet;
+    
+        // Validate outlet_name
+        if (!outlet_name) {
+            setError('Outlet Name is required.');
+            return false;
+        }
+    
+        // Validate address
+        if (!address) {
+            setError('Address is required.');
+            return false;
+        }
+    
+        // Validate district
+        if (!district) {
+            setError('District is required.');
+            return false;
+        }
+    
+        // Validate phone
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!phone) {
+            setError('Phone number is required.');
+            return false;
+        } else if (!phoneRegex.test(phone)) {
+            setError('Phone number should be 10 digits.');
+            return false;
+        }
+    
+        // Validate manager_id
+        if (!manager_id) {
+            setError('Manager must be selected.');
+            return false;
+        }
+    
+        setError('');
+        return true;
+    };
+    
+
     const handleAddOutlet = () => {
+        if (!validateForm()) return;
+
         setOutlets([...outlets, { id: outlets.length + 1, ...newOutlet }]);
         setNewOutlet({ outlet_name: '', address: '', district: '', phone: '', manager_id: '' });
         setIsModalOpen(false);
     };
 
     const handleEditOutlet = () => {
+        if (!validateForm()) return;
+
         setOutlets(outlets.map((outlet) => (outlet.id === selectedOutlet.id ? newOutlet : outlet)));
         setIsModalOpen(false);
         setSelectedOutlet(null);
@@ -168,6 +215,7 @@ const OutletManagement = () => {
                         <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
                             {selectedOutlet ? 'Edit Outlet' : 'Add Outlet'}
                         </h3>
+                        {error && <p className="text-red-500 text-sm">{error}</p>}
                         <div className="space-y-4">
                             <input
                                 type="text"

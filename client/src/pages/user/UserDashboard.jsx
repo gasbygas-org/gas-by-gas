@@ -80,16 +80,17 @@ const UserDashboard = () => {
                         <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
                             Overview Statistics
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-4">
-                                <div className="flex items-center text-gray-300">
-                                    <Package className="w-5 h-5 mr-3 text-blue-400" />
-                                    <span>Gas Requests: {gasRequests.length}</span>
-                                </div>
-                                <div className="flex items-center text-gray-300">
-                                    <Mail className="w-5 h-5 mr-3 text-blue-400" />
-                                    <span>Notifications: {notifications.length}</span>
-                                </div>
+                        <div className="flex justify-center items-center gap-8">
+                            {/* Gas Requests Box */}
+                            <div className="flex items-center justify-center bg-blue-100 text-blue-500 rounded-xl px-8 py-6 text-2xl shadow-xl">
+                                <Package className="w-6 h-6 mr-3 text-blue-400" />
+                                <span>Gas Requests: {gasRequests.length}</span>
+                            </div>
+
+                            {/* Notifications Box */}
+                            <div className="flex items-center justify-center bg-purple-100 text-purple-500 rounded-xl px-8 py-6 text-2xl shadow-xl">
+                                <Mail className="w-6 h-6 mr-3 text-purple-400" />
+                                <span>Notifications: {notifications.length}</span>
                             </div>
                         </div>
                     </div>

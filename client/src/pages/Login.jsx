@@ -18,6 +18,8 @@ const Login = () => {
     const [status, setStatus] = useState({ type: '', message: '' });
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
+    const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
     const navigate = useNavigate();
 
     const validateForm = () => {
@@ -105,6 +107,31 @@ const Login = () => {
         }
     };
 
+    const handleForgotPassword = async () => {
+        if (!forgotPasswordEmail) {
+            setError('Email is required to reset password');
+            return;
+        }
+        setIsLoading(true);
+        setStatus({ type: '', message: '' });
+
+        try {
+            const response = await API.post('/auth/forgot-password', { email: forgotPasswordEmail });
+
+            if (response.status === 200) {
+                setStatus({ type: 'success', message: 'Password reset link sent to your email!' });
+                setIsForgotPasswordModalOpen(false);
+            } else {
+                setStatus({ type: 'error', message: 'Failed to send reset link' });
+            }
+        } catch (error) {
+            console.error('Forgot password error:', error);
+            setStatus({ type: 'error', message: error.response?.data?.message || 'Something went wrong' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4">
             <m.div
@@ -174,6 +201,51 @@ const Login = () => {
                                 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
                         </button>
                     </form>
+
+                    {/* Forgot Password Link */}
+                    <div className="mt-4 text-center">
+                        <button
+                            onClick={() => setIsForgotPasswordModalOpen(true)}
+                            className="text-blue-400 hover:text-blue-300 transition-colors duration-150"
+                        >
+                            Forgot Password?
+                        </button>
+                    </div>
+
+                    {/* Forgot Password Modal */}
+                    {isForgotPasswordModalOpen && (
+                       <div className="fixed inset-0 backdrop-blur-xl bg-gray-900/30 flex items-center justify-center p-4">
+                            <div className="bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50 max-w-md w-full">
+                                <h3 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
+                                    Reset Your Password
+                                </h3>
+                                <div className="mb-4">
+                                    <input
+                                        type="email"
+                                        placeholder="Enter your email"
+                                        value={forgotPasswordEmail}
+                                        onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                                        className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
+                                        focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-gray-200"
+                                    />
+                                </div>
+                                <div className="flex justify-between">
+                                    <button
+                                        onClick={handleForgotPassword}
+                                        className="px-4 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/50 rounded-xl hover:bg-blue-500/20"
+                                    >
+                                        Send Reset Link
+                                    </button>
+                                    <button
+                                        onClick={() => setIsForgotPasswordModalOpen(false)}
+                                        className="px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/50 rounded-xl hover:bg-red-500/20"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Navigation Links */}
                     <div className="mt-6 text-center">

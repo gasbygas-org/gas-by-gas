@@ -39,19 +39,7 @@ const Register = () => {
 
         try {
             console.log('1. Starting registration with data:', formData);
-            // 1. Create Firebase Auth account
-            // const userCredential = await createUserWithEmailAndPassword(
-            //     auth, 
-            //     formData.email, 
-            //     formData.password
-            // );
-
-            // console.log('2. Firebase Auth account created:', userCredential.user.uid);
-
-            // 2. Get Firebase token
-            // const idToken = await userCredential.user.getIdToken();
-            // console.log('3. Got Firebase token');
-
+            
             // 3. Send all user data to backend
             const response = await API.post('/auth/register', {
                 email: formData.email,
@@ -60,13 +48,10 @@ const Register = () => {
                 nic: formData.nic,
                 name: formData.name,
                 address: formData.address,
-                role: 'user',
-                // uid: userCredential.user.uid,
-                // token: idToken
+                role: formData.role, // Pass the selected role here
             });
 
             console.log('4. Backend response:', response.data);
-            console.log(response);
 
             if (response.status === 201) {
                 setStatus({
@@ -79,14 +64,10 @@ const Register = () => {
             }
         } catch (error) {
             console.error('Registration error:', error);
-            if (error.code === 'auth/email-already-in-use') {
-                setError('This email is already registered');
-            } else if (error.code === 'auth/invalid-email') {
-                setError('Invalid email address');
-            } else if (error.code === 'auth/weak-password') {
-                setError('Password should be at least 6 characters');
+            if (error.response) {
+                setError(error.response.data.message || 'Registration failed');
             } else {
-                setError(error.response?.data?.message || 'Registration failed');
+                setError('An unexpected error occurred');
             }
         } finally {
             setIsLoading(false);
@@ -190,6 +171,18 @@ const Register = () => {
                             required
                         />
 
+                        {/* Role Dropdown */}
+                        <select
+                            value={formData.role}
+                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-xl 
+                                focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
+                                text-gray-200"
+                        >
+                            <option value="user">User</option>
+                            <option value="business">Business</option>
+                        </select>
+
                         <button
                             type="submit"
                             disabled={isLoading}
@@ -237,7 +230,6 @@ const Register = () => {
                         </div>
                     </form>
                 </div>
-
             </div>
         </div>
     );
