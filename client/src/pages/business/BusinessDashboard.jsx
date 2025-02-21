@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogOut, Package, Mail, FileText, User } from 'lucide-react';
+import apiClient from '../../api/apiClient';
 
 const BusinessDashboard = () => {
     const navigate = useNavigate();
+     const [gasRequestCount, setGasRequestCount] = useState(0); // State to store the gas request count
     const [gasRequests] = useState([
         { id: 1, user_id: 5, gas_type_name: '37.5 kg Commercial', quantity: 1, request_status: 'Pending', token: 'TOKEN789' },
     ]);
@@ -15,6 +17,8 @@ const BusinessDashboard = () => {
     const [organizationCertifications] = useState([
         { id: 5, user_id: 5, certification_path: '/path/to/certification1.pdf', status: 'Pending' },
     ]);
+     const [isLoading, setIsLoading] = useState(false);
+        const [error, setError] = useState(null);  // Error handling state
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -23,6 +27,38 @@ const BusinessDashboard = () => {
     };
 
     const user = JSON.parse(localStorage.getItem('user'));
+
+    // Fetch gas request count based on user ID when the component mounts
+    const fetchGasRequestCount = async () => {
+        setIsLoading(true);
+        setError(null); // Reset error state before API call
+        try {
+            const userId = user?.id; // Get user ID from local storage
+            const token = localStorage.getItem('token'); // Get token from local storage
+
+            if (!userId || !token) {
+                throw new Error('User ID or token is missing.');
+            }
+
+            // Make API call to fetch the gas request count
+            const response = await apiClient.get(`/api/request/gas-requests/count/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            setGasRequestCount(response.data.request_count); // Set the gas request count
+        } catch (error) {
+            console.error('Error fetching gas request count:', error);
+            setError('Failed to fetch gas request count. Please try again later.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchGasRequestCount(); // Fetch gas request count when the component mounts
+    }, []); // Empty dependency array ensures it only runs once when the component mounts
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-gray-100">
@@ -92,17 +128,19 @@ const BusinessDashboard = () => {
                                     <Package className="w-6 h-6 mr-3 text-blue-400" />
                                     <h3 className="text-lg font-semibold text-gray-300">Gas Requests</h3>
                                 </div>
-                                <p className="text-gray-400">Total Requests: {gasRequests.length}</p>
+                                <span>
+                                    Gas Requests: {isLoading ? 'Loading...' : error ? error : gasRequestCount}
+                                </span>
                             </div>
 
-                            {/* Notifications */}
+                            {/* Notifications
                             <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg border border-gray-700/50">
                                 <div className="flex items-center mb-4">
                                     <Mail className="w-6 h-6 mr-3 text-blue-400" />
                                     <h3 className="text-lg font-semibold text-gray-300">Notifications</h3>
                                 </div>
                                 <p className="text-gray-400">Total Notifications: {notifications.length}</p>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 

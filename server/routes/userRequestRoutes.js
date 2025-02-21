@@ -7,6 +7,7 @@ const {
     cancelRequest,
     rejectRequest,
     reallocateRequest,
+    getGasRequestCountByUserId,
 } = require('../controllers/userRequestController');
 const verifyToken = require('../middlewares/authMiddleware');
 
@@ -29,5 +30,8 @@ router.post('/gas/cancel', verifyToken, cancelRequest);
 router.post('/gas/reject', verifyToken, rejectRequest);
 
 router.post('/gas/reallocate', verifyToken, reallocateRequest);
+
+// Route to get gas request count by user ID
+router.get('/gas-requests/count/:userId', getGasRequestCountByUserId);
 
 module.exports = router;

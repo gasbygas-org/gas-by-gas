@@ -1,20 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogOut, Package, Mail, User } from 'lucide-react';
+import apiClient from '../../api/apiClient';
 
 const UserDashboard = () => {
     const navigate = useNavigate();
-    const [gasRequests] = useState([
-        { id: 1, user_id: 1, gas_type_name: '12.5 kg Domestic', quantity: 1, request_status: 'Pending', token: 'TOKEN123' },
-        { id: 2, user_id: 1, gas_type_name: '5 kg Domestic', quantity: 2, request_status: 'Approved', token: 'TOKEN456' },
-        { id: 3, user_id: 5, gas_type_name: '37.5 kg Commercial', quantity: 1, request_status: 'Delivered', token: 'TOKEN789' },
-    ]);
-
+    const [gasRequestCount, setGasRequestCount] = useState(0); // State to store the gas request count
     const [notifications] = useState([
         { id: 1, message: 'Your gas request has been scheduled for delivery on 2025-02-10', status: 'Sent' },
         { id: 2, message: 'Your gas request has been approved. Please pick it up between 2025-02-05 and 2025-02-19', status: 'Sent' },
         { id: 3, message: 'Your gas request has been delivered on 2025-01-30', status: 'Delivered' },
     ]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);  // Error handling state
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -23,6 +21,38 @@ const UserDashboard = () => {
     };
 
     const user = JSON.parse(localStorage.getItem('user'));
+
+    // Fetch gas request count based on user ID when the component mounts
+    const fetchGasRequestCount = async () => {
+        setIsLoading(true);
+        setError(null); // Reset error state before API call
+        try {
+            const userId = user?.id; // Get user ID from local storage
+            const token = localStorage.getItem('token'); // Get token from local storage
+
+            if (!userId || !token) {
+                throw new Error('User ID or token is missing.');
+            }
+
+            // Make API call to fetch the gas request count
+            const response = await apiClient.get(`/api/request/gas-requests/count/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            setGasRequestCount(response.data.request_count); // Set the gas request count
+        } catch (error) {
+            console.error('Error fetching gas request count:', error);
+            setError('Failed to fetch gas request count. Please try again later.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchGasRequestCount(); // Fetch gas request count when the component mounts
+    }, []); // Empty dependency array ensures it only runs once when the component mounts
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-gray-100">
@@ -84,14 +114,16 @@ const UserDashboard = () => {
                             {/* Gas Requests Box */}
                             <div className="flex items-center justify-center bg-blue-100 text-blue-500 rounded-xl px-8 py-6 text-2xl shadow-xl">
                                 <Package className="w-6 h-6 mr-3 text-blue-400" />
-                                <span>Gas Requests: {gasRequests.length}</span>
+                                <span>
+                                    Gas Requests: {isLoading ? 'Loading...' : error ? error : gasRequestCount}
+                                </span>
                             </div>
 
-                            {/* Notifications Box */}
+                            {/* Notifications Box
                             <div className="flex items-center justify-center bg-purple-100 text-purple-500 rounded-xl px-8 py-6 text-2xl shadow-xl">
                                 <Mail className="w-6 h-6 mr-3 text-purple-400" />
                                 <span>Notifications: {notifications.length}</span>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 

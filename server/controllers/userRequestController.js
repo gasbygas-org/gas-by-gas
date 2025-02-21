@@ -506,3 +506,20 @@ exports.getUserRequests = async (req, res) => {
         });
     }
 };
+// Controller method to get gas request count by user ID
+exports.getGasRequestCountByUserId = async (req, res) => {
+    const { userId } = req.params; // Getting the userId from URL params
+
+    try {
+        // Validate userId (simple validation, you can extend it)
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
+        const count = await userRequestRepository.getGasRequestCountByUserId(userId);
+        res.status(200).json({ userId, request_count: count }); // Return the count
+    } catch (error) {
+        console.error('Error fetching gas request count:', error);
+        res.status(500).json({ message: 'Failed to fetch gas request count', error: error.message });
+    }
+};

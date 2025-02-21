@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, ArrowLeft, Download, FileText, Package } from 'lucide-react';
+import apiClient from '../../api/apiClient';
 
 const BusinessReports = () => {
     const navigate = useNavigate();
@@ -8,44 +9,43 @@ const BusinessReports = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
-    const userRequests = [
-        {
-            id: 1,
-            user_id: 1,
-            outlet_id: 1,
-            gas_type_id: 1,
-            quantity: 1,
-            request_status: 'Pending',
-            token: 'TOKEN123',
-            delivery_date: '2025-02-10',
-            created_at: '2025-01-29 18:26:24',
-            updated_at: '2025-01-30 08:43:56'
-        },
-        {
-            id: 2,
-            user_id: 1,
-            outlet_id: 2,
-            gas_type_id: 2,
-            quantity: 2,
-            request_status: 'Approved',
-            token: 'TOKEN456',
-            delivery_date: '2025-02-05',
-            created_at: '2025-01-29 18:26:24',
-            updated_at: '2025-01-30 08:44:01'
-        },
-        {
-            id: 3,
-            user_id: 5,
-            outlet_id: 3,
-            gas_type_id: 3,
-            quantity: 1,
-            request_status: 'Delivered',
-            token: 'TOKEN789',
-            delivery_date: '2025-01-30',
-            created_at: '2025-01-29 18:26:24',
-            updated_at: '2025-01-30 08:43:43'
+    const [gasRequests, setGasRequests] = useState([]);
+    const [isLoading, setIsLoading] = useState(false); 
+    const [error, setError] = useState(null); 
+    const [totalPages, setTotalPages] = useState(1); 
+    const [currentPage, setCurrentPage] = useState(1); 
+    const requestsPerPage = 10;
+    
+    const fetchGasRequests = async (page) => {
+        setIsLoading(true);  
+        setError(null);  
+        try {
+            const userId = JSON.parse(localStorage.getItem('user'))?.id; 
+            const token = localStorage.getItem('token'); 
+            const response = await apiClient.get(`/api/request/gas/requests`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                params: {
+                    userId: userId,
+                    page: page, 
+                    pageSize: requestsPerPage, 
+                },
+            });
+    
+            const pagination = response.data.pagination;
+            setGasRequests(response.data.data);
+            setTotalPages(pagination.totalPages);
+        } catch (error) {
+            console.log(error);
+            setError('Failed to fetch gas requests. Please try again later.');
+        } finally {
+            setIsLoading(false);
         }
-    ];
+    };
+    useEffect(() => {
+        fetchGasRequests(currentPage);
+    }, [currentPage]);
 
     const users = [
         { id: 1, name: 'GBG User' },
@@ -79,13 +79,15 @@ const BusinessReports = () => {
     };
 
     const handleDownloadReport = () => {
-        const filteredRequests = userRequests.filter((request) => {
+        // Use the correct state `gasRequests` for the download
+        const filteredRequests = gasRequests.filter((request) => {
             const createdAt = new Date(request.created_at);
             const start = startDate ? new Date(startDate) : null;
             const end = endDate ? new Date(endDate) : null;
             return (!start || createdAt >= start) && (!end || createdAt <= end);
         });
-
+    
+        // Define headers for the CSV file
         const headers = [
             'Request ID',
             'User Name',
@@ -97,7 +99,8 @@ const BusinessReports = () => {
             'Created At',
             'Updated At'
         ];
-
+    
+        // Map the filtered data to the required CSV format
         const dataToDownload = filteredRequests.map((request) => ({
             'Request ID': request.id,
             'User Name': users.find((user) => user.id === request.user_id)?.name || 'N/A',
@@ -109,27 +112,31 @@ const BusinessReports = () => {
             'Created At': request.created_at,
             'Updated At': request.updated_at
         }));
-
+    
+       
         const csvContent = [
-            headers.join(','),
-            ...dataToDownload.map((row) => headers.map((header) => row[header]).join(','))
+            headers.join(','), 
+            ...dataToDownload.map((row) => headers.map((header) => row[header]).join(',')) 
         ].join('\n');
+    
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `business-requests-report.csv`;
-        link.click();
+        link.download = `business-requests-report.csv`; 
+        link.click(); 
     };
+    
 
     const renderReportContent = () => {
-        const filteredRequests = userRequests.filter((request) => {
+       
+        const filteredRequests = gasRequests.filter((request) => {
             const createdAt = new Date(request.created_at);
             const start = startDate ? new Date(startDate) : null;
             const end = endDate ? new Date(endDate) : null;
             return (!start || createdAt >= start) && (!end || createdAt <= end);
         });
-
+    
         return (
             <div className="backdrop-blur-xl bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50">
                 <h2 className="text-3xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
@@ -199,6 +206,7 @@ const BusinessReports = () => {
             </div>
         );
     };
+    
 
     return (
         <div className="flex h-screen bg-gray-900">

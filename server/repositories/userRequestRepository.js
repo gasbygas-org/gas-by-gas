@@ -118,6 +118,16 @@ class UserRequestRepository {
         `;
         await db.execute(query, [userId, message]);
     }
+     // Method to get gas request count by user ID
+     async getGasRequestCountByUserId(userId) {
+        try {
+            const query = 'SELECT COUNT(*) AS request_count FROM user_requests WHERE user_id = ?';
+            const [rows] = await this.db.execute(query, [userId]); // Using prepared statements to prevent SQL injection
+            return rows[0].request_count;
+        } catch (error) {
+            throw new Error('Error retrieving gas request count');
+        }
+    }
 }
 
 module.exports = UserRequestRepository;
