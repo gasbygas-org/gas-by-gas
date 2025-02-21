@@ -14,10 +14,9 @@ class UserAdminRepository {
         const [results] = await this.db.query(query, [roleName]);
         return results;
     }
-    // Get users with their roles
     async getUsersWithRoles() {
         const query = `
-            SELECT u.id, u.nic, u.name, u.phone, u.email, r.role_name AS role, u.address
+            SELECT u.id, u.nic, u.name, u.phone, u.email, r.role_name AS role, u.address, u.created_at, u.updated_at
             FROM users u
             INNER JOIN roles r ON u.role_id = r.id;
         `;

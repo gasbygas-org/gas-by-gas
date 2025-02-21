@@ -1,21 +1,37 @@
 // client\src\pages\admin\Reports.jsx
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, ArrowLeft, Download, FileText, Users, Store, Package, Activity } from 'lucide-react';
+import API from '../../api/config';
+
 
 const Reports = () => {
     const navigate = useNavigate();
     const [activeReport, setActiveReport] = useState('user-registration');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [users, setUsers] = useState([]);  // State to store fetched users
+    const [loading, setLoading] = useState(false);  // State to handle loading state
+    const [error, setError] = useState(null);  // State to handle errors
 
-    const users = [
-        { id: 1, name: 'GBG User', nic: '123451001V', phone: '1234561001', email: 'althaf.1035+gbg.user@gmail.com', address: 'address', role_name: 'user', created_at: '2025-01-30 08:28:56', updated_at: '2025-01-30 08:28:56' },
-        { id: 2, name: 'GBG Admin', nic: '123451002V', phone: '1234561002', email: 'althaf.1035+gbg.admin@gmail.com', address: 'address', role_name: 'admin', created_at: '2025-01-30 08:29:47', updated_at: '2025-01-30 08:29:47' },
-        { id: 3, name: 'GBG Dispatch Admin', nic: '123451003V', phone: '1234561003', email: 'althaf.1035+gbg.dispatch_admin@gmail.com', address: 'address', role_name: 'dispatch_admin', created_at: '2025-01-30 08:33:12', updated_at: '2025-01-30 08:33:12' },
-        { id: 4, name: 'GBG Outlet Manager', nic: '123451004V', phone: '1234561004', email: 'althaf.1035+gbg.outlet_manager@gmail.com', address: 'address', role_name: 'outlet_manager', created_at: '2025-01-30 08:34:03', updated_at: '2025-01-30 08:34:03' },
-        { id: 5, name: 'GBG Business', nic: '123451005V', phone: '1234561005', email: 'althaf.1035+gbg.business@gmail.com', address: 'address', role_name: 'business', created_at: '2025-01-30 08:34:40', updated_at: '2025-01-30 08:34:40' }
-    ];
+    // Fetch users data from API when component mounts
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setLoading(true);  // Set loading to true before API call
+            try {
+                const response = await API.get('user/users/all');
+                setUsers(response.data);  // Update state with API response
+            } catch (err) {
+                setError('Failed to fetch users data');  // Handle error if API call fails
+                console.error('Error fetching users:', err);
+            } finally {
+                setLoading(false);  // Set loading to false after API call
+            }
+        };
+
+        fetchUsers();
+    }, []);  // Empty dependency array means this runs once when component mounts
+
 
     const outlets = [
         { id: 1, outlet_name: 'City Gas Outlet', address: '10 Station Road, Colombo', district: 'Colombo', phone: '0112777333', manager_id: 4, created_at: '2025-01-29 18:25:10', updated_at: '2025-01-30 08:38:37' },
@@ -207,7 +223,7 @@ const Reports = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{user.phone}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{user.email}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{user.address}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{user.role_name}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{user.role}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{user.created_at}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{user.updated_at}</td>
                                         </tr>
