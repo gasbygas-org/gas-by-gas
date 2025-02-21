@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Users, Edit, Trash2, Search, Filter, ArrowLeft, Plus } from 'lucide-react';
+import API from '../../api/config';
 
 const UserManagement = () => {
     const navigate = useNavigate();
@@ -78,14 +79,55 @@ const UserManagement = () => {
         setIsModalOpen(true);
     };
 
-    const handleSaveUser = () => {
-        if (selectedUser) {
-            console.log('Update user:', selectedUser.id, newUser);
-        } else {
-            console.log('Add new user:', newUser);
+    const handleSaveUser = async () => {
+        try {
+            // If a user is being edited, update the user (you can implement the update logic here)
+            if (selectedUser) {
+                console.log('Updating user:', selectedUser.id, newUser);
+                // You can call the API to update the user (replace this with your actual update endpoint)
+                const response = await API.put(`/auth/update/${selectedUser.id}`, newUser);
+                console.log('User updated:', response.data);
+            } else {
+                // Add a new user by calling the /auth/register API
+                const response = await API.post('/auth/register', {
+                    email: newUser.email,
+                    password: newUser.password,
+                    phone: newUser.phone,
+                    nic: newUser.nic,
+                    name: newUser.name,
+                    address: newUser.address,
+                    role: newUser.role,  // Ensure this is one of the valid roles
+                });
+    
+                if (response.status === 201) {
+                    console.log('New user added:', response.data);
+                    // Close the modal after successful registration
+                    setIsModalOpen(false);
+    
+                    // Optional: Show a success notification or redirect to a different page
+                    alert('User registered successfully! A verification email has been sent.');
+                    // Redirect to a different page or dashboard if needed
+                    navigate('/admin/dashboard');
+                } else {
+                    // Handle API errors, e.g., role not valid, NIC already in use, etc.
+                    alert('Failed to register user: ' + response.data.message);
+                }
+            }
+        } catch (error) {
+            // Log the full error response from the API
+            console.error('Error saving user:', error);
+    
+            // Handle different types of error responses from the API
+            if (error.response) {
+                console.error('Error response from server:', error.response);
+                alert('Failed to save user: ' + (error.response.data.message || error.response.statusText));
+            } else {
+                alert('Failed to save user: ' + error.message);
+            }
         }
-        setIsModalOpen(false);
     };
+    
+    
 
     const filteredUsers = users.filter(user => {
         return (
