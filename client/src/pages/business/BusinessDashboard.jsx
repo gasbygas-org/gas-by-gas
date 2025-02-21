@@ -27,7 +27,7 @@ const BusinessDashboard = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-gray-100">
             <div className="fixed inset-0">
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40" />
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9nVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-900/50 to-gray-900" />
             </div>
 
@@ -71,28 +71,42 @@ const BusinessDashboard = () => {
                 </nav>
 
                 <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    {/* Overview Statistics */}
                     <div className="backdrop-blur-xl bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50 mb-8">
                         <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
                             Overview Statistics
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-4">
-                                <div className="flex items-center text-gray-300">
-                                    <FileText className="w-5 h-5 mr-3 text-blue-400" />
-                                    <span>Business Registration Status: {organizationCertifications[0].status}</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Business Registration */}
+                            <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg border border-gray-700/50">
+                                <div className="flex items-center mb-4">
+                                    <FileText className="w-6 h-6 mr-3 text-blue-400" />
+                                    <h3 className="text-lg font-semibold text-gray-300">Business Registration Status</h3>
                                 </div>
-                                <div className="flex items-center text-gray-300">
-                                    <Package className="w-5 h-5 mr-3 text-blue-400" />
-                                    <span>Gas Requests: {gasRequests.length}</span>
+                                <p className="text-gray-400">Status: {organizationCertifications[0].status}</p>
+                            </div>
+
+                            {/* Gas Requests */}
+                            <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg border border-gray-700/50">
+                                <div className="flex items-center mb-4">
+                                    <Package className="w-6 h-6 mr-3 text-blue-400" />
+                                    <h3 className="text-lg font-semibold text-gray-300">Gas Requests</h3>
                                 </div>
-                                <div className="flex items-center text-gray-300">
-                                    <Mail className="w-5 h-5 mr-3 text-blue-400" />
-                                    <span>Notifications: {notifications.length}</span>
+                                <p className="text-gray-400">Total Requests: {gasRequests.length}</p>
+                            </div>
+
+                            {/* Notifications */}
+                            <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg border border-gray-700/50">
+                                <div className="flex items-center mb-4">
+                                    <Mail className="w-6 h-6 mr-3 text-blue-400" />
+                                    <h3 className="text-lg font-semibold text-gray-300">Notifications</h3>
                                 </div>
+                                <p className="text-gray-400">Total Notifications: {notifications.length}</p>
                             </div>
                         </div>
                     </div>
 
+                    {/* Quick Links */}
                     <div className="backdrop-blur-xl bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50">
                         <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
                             Quick Links
