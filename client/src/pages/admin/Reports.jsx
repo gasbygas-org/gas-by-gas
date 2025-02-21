@@ -64,7 +64,7 @@ const Reports = () => {
         { id: 'user-registration', name: 'User Registration', icon: Users },
         { id: 'outlet-management', name: 'Outlet Management', icon: Store },
         { id: 'stock-management', name: 'Stock Management', icon: Package },
-        { id: 'system-activity', name: 'System Activity', icon: Activity }
+        // { id: 'system-activity', name: 'System Activity', icon: Activity }
     ];
 
     const handleLogout = () => {
