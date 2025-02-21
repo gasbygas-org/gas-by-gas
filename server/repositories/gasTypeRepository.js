@@ -13,6 +13,16 @@ class GasTypeRepository {
         const [rows] = await this.db.query(query, [category]);
         return rows;
     }
+
+    async getAllGasTypes() {
+        const query = `
+            SELECT id, gas_type_name, gas_category 
+            FROM gas_types 
+            ORDER BY gas_type_name ASC;
+        `;
+        const [rows] = await this.db.query(query);
+        return rows;
+    }
 }
 
 module.exports = GasTypeRepository;

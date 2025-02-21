@@ -46,6 +46,7 @@ const CustomerRequestManagement = () => {
             setGasRequests(response.data.data);
             setTotalPages(pagination.totalPages);
         } catch (error) {
+            console.log(error);
             setError('Failed to fetch gas requests. Please try again later.');
         } finally {
             setIsLoading(false);
@@ -66,6 +67,7 @@ const CustomerRequestManagement = () => {
 
             setGasRequestCustomers(response.data.users);
         } catch (error) {
+            console.log(error);
             setError('Failed to fetch gas request customers. Please try again later.');
         } finally {
             setIsLoading(false);
