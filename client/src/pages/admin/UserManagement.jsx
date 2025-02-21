@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Users, Edit, Trash2, Search, Filter, ArrowLeft, Plus } from 'lucide-react';
 import API from '../../api/config';
@@ -6,14 +6,7 @@ import API from '../../api/config';
 const UserManagement = () => {
     const navigate = useNavigate();
 
-    const users = [
-        { id: 1, nic: '123451001V', name: 'GBG User', phone: '1234561001', email: 'althaf.1035+gbg.user@gmail.com', role: 'user', password: '11111111', address: 'address' },
-        { id: 2, nic: '123451002V', name: 'GBG Admin', phone: '1234561002', email: 'althaf.1035+gbg.admin@gmail.com', role: 'admin', password: '11111111', address: 'address' },
-        { id: 3, nic: '123451003V', name: 'GBG Dispatch Admin', phone: '1234561003', email: 'althaf.1035+gbg.dispatch_admin@gmail.com', role: 'dispatch_admin', password: '11111111', address: 'address' },
-        { id: 4, nic: '123451004V', name: 'GBG Outlet Manager', phone: '1234561004', email: 'althaf.1035+gbg.outlet_manager@gmail.com', role: 'outlet_manager', password: '11111111', address: 'address' },
-        { id: 5, nic: '123451005V', name: 'GBG Business', phone: '1234561005', email: 'althaf.1035+gbg.business@gmail.com', role: 'business', password: '11111111', address: 'address' }
-    ];
-
+    const [users, setUsers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterRole, setFilterRole] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,6 +21,20 @@ const UserManagement = () => {
         password: '',
         address: ''
     });
+
+    // Fetch users on component mount
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await API.get('user/users/all'); 
+                setUsers(response.data); 
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                alert('Failed to fetch users.');
+            }
+        };
+        fetchUsers();
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -50,11 +57,23 @@ const UserManagement = () => {
         setIsModalOpen(true);
     };
 
-    const handleDeleteUser = (userId) => {
-        const user = users.find(u => u.id === userId);
-        setSelectedUser(user);
-        setIsDeleteModalOpen(true);
+    const handleDeleteUser = async (userId) => {
+        const confirmDelete = window.confirm('Are you sure you want to delete this user?');
+        if (!confirmDelete) return;
+    
+        try {
+            const response = await API.delete(`/user/users/delete/${userId}`);
+            if (response.status === 200) {
+                alert('User deleted successfully');
+            } else {
+                alert('Failed to delete user');
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            alert('Error deleting user');
+        }
     };
+    
 
     const handleConfirmDelete = () => {
         console.log('Delete user:', selectedUser.id);
@@ -81,14 +100,18 @@ const UserManagement = () => {
 
     const handleSaveUser = async () => {
         try {
-            // If a user is being edited, update the user (you can implement the update logic here)
             if (selectedUser) {
                 console.log('Updating user:', selectedUser.id, newUser);
-                // You can call the API to update the user (replace this with your actual update endpoint)
-                const response = await API.put(`/auth/update/${selectedUser.id}`, newUser);
-                console.log('User updated:', response.data);
+                const response = await API.put(`/user/users/edit/${selectedUser.id}`, newUser);
+                if (response.status === 200) {
+                    alert('User updated successfully');
+                    setIsModalOpen(false);
+                    //fetchUsers();
+                } else {
+                    alert('Failed to update user');
+                }
             } else {
-                // Add a new user by calling the /auth/register API
+                
                 const response = await API.post('/auth/register', {
                     email: newUser.email,
                     password: newUser.password,
@@ -96,28 +119,28 @@ const UserManagement = () => {
                     nic: newUser.nic,
                     name: newUser.name,
                     address: newUser.address,
-                    role: newUser.role,  // Ensure this is one of the valid roles
+                    role: newUser.role,  
                 });
-    
+
                 if (response.status === 201) {
                     console.log('New user added:', response.data);
-                    // Close the modal after successful registration
+                  
                     setIsModalOpen(false);
     
-                    // Optional: Show a success notification or redirect to a different page
+                 
                     alert('User registered successfully! A verification email has been sent.');
-                    // Redirect to a different page or dashboard if needed
+                   
                     navigate('/admin/dashboard');
                 } else {
-                    // Handle API errors, e.g., role not valid, NIC already in use, etc.
+                
                     alert('Failed to register user: ' + response.data.message);
                 }
             }
         } catch (error) {
-            // Log the full error response from the API
+         
             console.error('Error saving user:', error);
     
-            // Handle different types of error responses from the API
+          
             if (error.response) {
                 console.error('Error response from server:', error.response);
                 alert('Failed to save user: ' + (error.response.data.message || error.response.statusText));
@@ -171,93 +194,93 @@ const UserManagement = () => {
             </nav>
 
             <div className="relative">
-                <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    <div className="backdrop-blur-xl bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50 mb-8">
-                        <h2 className="text-3xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
-                            Manage Users
-                        </h2>
+            <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <div className="backdrop-blur-xl bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50 mb-8">
+                    <h2 className="text-3xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
+                        Manage Users
+                    </h2>
 
-                        <div className="flex justify-between mb-6">
-                            <div className="flex items-center space-x-4">
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        placeholder="Search by name"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="bg-gray-700/50 border border-gray-600/50 rounded-xl pl-10 pr-4 py-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-                                    />
-                                    <Search className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
-                                </div>
-                                <div className="relative">
-                                    <select
-                                        value={filterRole}
-                                        onChange={(e) => setFilterRole(e.target.value)}
-                                        className="bg-gray-700/50 border border-gray-600/50 rounded-xl pl-10 pr-4 py-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:border-blue-400"
-                                    >
-                                        <option value="">All Roles</option>
-                                        <option value="user">User</option>
-                                        <option value="admin">Admin</option>
-                                        <option value="dispatch_admin">Dispatch Admin</option>
-                                        <option value="outlet_manager">Outlet Manager</option>
-                                        <option value="business">Business</option>
-                                    </select>
-                                    <Filter className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
-                                </div>
+                    <div className="flex justify-between mb-6">
+                        <div className="flex items-center space-x-4">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Search by name"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="bg-gray-700/50 border border-gray-600/50 rounded-xl pl-10 pr-4 py-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                                />
+                                <Search className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
                             </div>
+                            <div className="relative">
+                                <select
+                                    value={filterRole}
+                                    onChange={(e) => setFilterRole(e.target.value)}
+                                    className="bg-gray-700/50 border border-gray-600/50 rounded-xl pl-10 pr-4 py-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                                >
+                                    <option value="">All Roles</option>
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="dispatch_admin">Dispatch Admin</option>
+                                    <option value="outlet_manager">Outlet Manager</option>
+                                    <option value="business">Business</option>
+                                </select>
+                                <Filter className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
+                            </div>
+                        </div>
                             <button
                                 onClick={handleAddUser}
                                 className="inline-flex items-center px-4 py-2 bg-green-500/10 text-green-400 
                                     border border-green-500/50 rounded-xl hover:bg-green-500/20 transition-all duration-200"
                             >
-                                <Plus className="w-4 h-4 mr-2" />
-                                Add New User
-                            </button>
-                        </div>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add New User
+                        </button>
+                    </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full">
-                                <thead>
-                                    <tr className="border-b border-gray-700/50">
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-300">Name</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-300">NIC</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-300">Phone</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-300">Email</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-300">Role</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-300">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredUsers.map(user => (
-                                        <tr key={user.id} className="border-b border-gray-700/50 hover:bg-gray-700/10 transition-colors duration-200">
-                                            <td className="px-6 py-4 text-sm text-gray-300">{user.name}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-300">{user.nic}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-300">{user.phone}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-300">{user.email}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-300">{user.role}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-300">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full">
+                            <thead>
+                                <tr className="border-b border-gray-700/50">
+                                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-300">Name</th>
+                                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-300">NIC</th>
+                                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-300">Phone</th>
+                                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-300">Email</th>
+                                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-300">Role</th>
+                                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-300">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredUsers.map(user => (
+                                    <tr key={user.id} className="border-b border-gray-700/50 hover:bg-gray-700/10 transition-colors duration-200">
+                                        <td className="px-6 py-4 text-sm text-gray-300">{user.name}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-300">{user.nic}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-300">{user.phone}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-300">{user.email}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-300">{user.role}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-300">
                                                 <button
                                                     onClick={() => handleEditUser(user.id)}
                                                     className="inline-flex items-center px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/50 rounded-xl hover:bg-blue-500/20 transition-all duration-200 mr-2"
                                                 >
-                                                    <Edit className="w-4 h-4 mr-2" />
-                                                    Edit
-                                                </button>
+                                                <Edit className="w-4 h-4 mr-2" />
+                                                Edit
+                                            </button>
                                                 <button
                                                     onClick={() => handleDeleteUser(user.id)}
                                                     className="inline-flex items-center px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/50 rounded-xl hover:bg-red-500/20 transition-all duration-200"
                                                 >
-                                                    <Trash2 className="w-4 h-4 mr-2" />
-                                                    Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                                <Trash2 className="w-4 h-4 mr-2" />
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
-                </main>
+                </div>
+            </main>
             </div>
 
             {isModalOpen && (
