@@ -1,25 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, ArrowLeft, Plus, Edit, Trash, Search, Filter } from 'lucide-react';
+import apiClient from '../../api/apiClient';
 
 const StockManagement = () => {
     const navigate = useNavigate();
-
-    // Static data extracted from gasbygas.sql
-    const stocks = [
-        { id: 1, location: 'Head Office', gasType: '12.5 kg Domestic', quantity: 100 },
-        { id: 2, location: 'Head Office', gasType: '5 kg Domestic', quantity: 50 },
-        { id: 3, location: 'Head Office', gasType: '37.5 kg Commercial', quantity: 50 },
-        { id: 4, location: 'City Gas Outlet, Colombo', gasType: '12.5 kg Domestic', quantity: 20 },
-        { id: 5, location: 'City Gas Outlet, Colombo', gasType: '5 kg Domestic', quantity: 15 },
-    ];
-
     const [searchQuery, setSearchQuery] = useState('');
     const [filterGasType, setFilterGasType] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
     const [selectedStock, setSelectedStock] = useState(null);
-    const [newStock, setNewStock] = useState({ location: '', gasType: '', quantity: '' });
+    const [newStock, setNewStock] = useState({ outletId: '', gasTypeId: '', quantity: '', stockId: '' });
+    const [stocks, setStocks] = useState([]);
+    const [outlets, setOutlets] = useState([]);
+    const [gasTypes, setGasTypes] = useState([]);
+
+    useEffect(() => {
+        fetchStocks();
+        fetchOutlets();
+        fetchGasTypes();
+    }, [searchQuery, filterGasType]);
+
+    const fetchStocks = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await apiClient.get('/api/stock/stocks', {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { query: searchQuery, gasTypeId: filterGasType },
+            });
+            setStocks(response.data);
+        } catch (error) {
+            console.error('Error fetching stocks:', error);
+        }
+    };
+
+    const fetchOutlets = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await apiClient.get('/api/outlet', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setOutlets(response.data);
+        } catch (error) {
+            console.error('Error fetching outlets:', error);
+        }
+    };
+
+    const fetchGasTypes = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await apiClient.get('/api/gas-types/all', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setGasTypes(response.data);
+        } catch (error) {
+            console.error('Error fetching gas types:', error);
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -31,45 +68,61 @@ const StockManagement = () => {
         navigate('/admin/dashboard');
     };
 
-    const handleAddStock = () => {
-        setStocks([...stocks, { id: stocks.length + 1, ...newStock }]);
-        setNewStock({ location: '', gasType: '', quantity: '' });
-        setIsModalOpen(false);
+    const handleAddStock = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await apiClient.post('/api/stock/stocks', newStock, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            fetchStocks();
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error('Error adding stock:', error);
+        }
     };
 
-    const handleEditStock = () => {
-        setStocks(stocks.map((stock) => (stock.id === selectedStock.id ? newStock : stock)));
-        setIsModalOpen(false);
-        setSelectedStock(null);
+    const handleEditStock = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await apiClient.put('/api/stock/stocks', newStock, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            fetchStocks();
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error('Error updating stock:', error);
+        }
     };
 
-    const handleDeleteStock = () => {
-        setStocks(stocks.filter((stock) => stock.id !== selectedStock.id));
-        setIsDeleteConfirmationOpen(false);
-        setSelectedStock(null);
+    const handleDeleteStock = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await apiClient.delete(`/api/stock/stocks/${selectedStock.stock_id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            fetchStocks();
+            setIsDeleteConfirmationOpen(false);
+        } catch (error) {
+            console.error('Error deleting stock:', error);
+        }
     };
 
     const openModal = (stock = null) => {
+        // console.log(stock);
         if (stock) {
             setSelectedStock(stock);
-            setNewStock(stock);
+            setNewStock({ outletId: stock.outlet_id, gasTypeId: stock.gas_type_id, quantity: stock.quantity, stockId: stock.stock_id });
         } else {
-            setNewStock({ location: '', gasType: '', quantity: '' });
+            setNewStock({ outletId: '', gasTypeId: '', quantity: '', stockId: '' });
         }
         setIsModalOpen(true);
+        // console.log(newStock);
     };
 
     const openDeleteConfirmation = (stock) => {
         setSelectedStock(stock);
         setIsDeleteConfirmationOpen(true);
     };
-
-    const filteredStocks = stocks.filter(stock => {
-        return (
-            stock.location.toLowerCase().includes(searchQuery.toLowerCase()) &&
-            (filterGasType ? stock.gasType === filterGasType : true)
-        );
-    });
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-gray-100">
@@ -84,8 +137,7 @@ const StockManagement = () => {
                         <div className="flex items-center space-x-4">
                             <button
                                 onClick={handleBackToDashboard}
-                                className="inline-flex items-center px-4 py-2 bg-blue-500/10 text-blue-400 
-                                    border border-blue-500/50 rounded-xl hover:bg-blue-500/20 transition-all duration-200"
+                                className="inline-flex items-center px-4 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/50 rounded-xl hover:bg-blue-500/20 transition-all duration-200"
                             >
                                 <ArrowLeft className="w-4 h-4 mr-2" />
                                 Back to Dashboard
@@ -94,8 +146,7 @@ const StockManagement = () => {
                         <div className="flex items-center space-x-4">
                             <button
                                 onClick={handleLogout}
-                                className="inline-flex items-center px-4 py-2 bg-red-500/10 text-red-400 
-                                    border border-red-500/50 rounded-xl hover:bg-red-500/20 transition-all duration-200"
+                                className="inline-flex items-center px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/50 rounded-xl hover:bg-red-500/20 transition-all duration-200"
                             >
                                 <LogOut className="w-4 h-4 mr-2" />
                                 Logout
@@ -114,8 +165,7 @@ const StockManagement = () => {
                         <div className="mb-6">
                             <button
                                 onClick={() => openModal()}
-                                className="inline-flex items-center px-4 py-2 bg-blue-500/10 text-blue-400 
-                                    border border-blue-500/50 rounded-xl hover:bg-blue-500/20 transition-all duration-200"
+                                className="inline-flex items-center px-4 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/50 rounded-xl hover:bg-blue-500/20 transition-all duration-200"
                             >
                                 <Plus className="w-4 h-4 mr-2" />
                                 Add Stock
@@ -140,9 +190,11 @@ const StockManagement = () => {
                                         className="bg-gray-700/50 border border-gray-600/50 rounded-xl pl-10 pr-4 py-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:border-blue-400"
                                     >
                                         <option value="">All Gas Types</option>
-                                        <option value="12.5 kg Domestic">12.5 kg Domestic</option>
-                                        <option value="5 kg Domestic">5 kg Domestic</option>
-                                        <option value="37.5 kg Commercial">37.5 kg Commercial</option>
+                                        {gasTypes.map((type) => (
+                                            <option key={type.id} value={type.id}>
+                                                {type.gas_type_name}
+                                            </option>
+                                        ))}
                                     </select>
                                     <Filter className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
                                 </div>
@@ -159,10 +211,10 @@ const StockManagement = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-700/50">
-                                    {filteredStocks.map((stock) => (
-                                        <tr key={stock.id} className="bg-gray-900/20">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{stock.location}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{stock.gasType}</td>
+                                    {stocks.map((stock) => (
+                                        <tr key={stock.stock_id} className="bg-gray-900/20">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{stock.outlet_name}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{stock.gas_type_name}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{stock.quantity}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <button
@@ -195,23 +247,28 @@ const StockManagement = () => {
                         </h3>
                         <div className="space-y-4">
                             <select
-                                value={newStock.location}
-                                onChange={(e) => setNewStock({ ...newStock, location: e.target.value })}
+                                value={newStock.outletId}
+                                onChange={(e) => setNewStock({ ...newStock, outletId: e.target.value })}
                                 className="w-full px-4 py-2 bg-gray-900/50 border border-gray-700/50 rounded-xl"
                             >
-                                <option value="">Select Location</option>
-                                <option value="Head Office">Head Office</option>
-                                <option value="City Gas Outlet, Colombo">City Gas Outlet, Colombo</option>
+                                <option value="">Select Outlet</option>
+                                {outlets.map((outlet) => (
+                                    <option key={outlet.id} value={outlet.id}>
+                                        {outlet.outlet_name}
+                                    </option>
+                                ))}
                             </select>
                             <select
-                                value={newStock.gasType}
-                                onChange={(e) => setNewStock({ ...newStock, gasType: e.target.value })}
+                                value={newStock.gasTypeId}
+                                onChange={(e) => setNewStock({ ...newStock, gasTypeId: e.target.value })}
                                 className="w-full px-4 py-2 bg-gray-900/50 border border-gray-700/50 rounded-xl"
                             >
                                 <option value="">Select Gas Type</option>
-                                <option value="12.5 kg Domestic">12.5 kg Domestic</option>
-                                <option value="5 kg Domestic">5 kg Domestic</option>
-                                <option value="37.5 kg Commercial">37.5 kg Commercial</option>
+                                {gasTypes.map((type) => (
+                                    <option key={type.id} value={type.id}>
+                                        {type.gas_type_name}
+                                    </option>
+                                ))}
                             </select>
                             <input
                                 type="number"

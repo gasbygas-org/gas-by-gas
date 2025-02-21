@@ -72,6 +72,32 @@ exports.filterGasRequest = async (req, res) => {
     }
 };
 
+exports.getAllGasRequests = async (req, res) => {
+    const { query, status } = req.query;
+    const { page = 1, limit = 10 } = req.query;
+
+    try {
+        const offset = (page - 1) * limit;
+
+        const { results, totalCount } = await stockRepository.getAllGasRequests(query, status, offset, parseInt(limit));
+
+        const totalPages = Math.ceil(totalCount / limit);
+
+        res.status(200).json({
+            currentPage: parseInt(page),
+            totalPages,
+            totalRequests: totalCount,
+            gasRequests: results,
+        });
+    } catch (error) {
+        console.error("Error filtering gas requests:", error);
+        res.status(500).json({
+            message: "Failed to fetch gas requests.",
+            error: error.message,
+        });
+    }
+};
+
 exports.approveGasRequest = async (req, res) => {
     const { outletId, requestId, gasAmount, status } = req.body;
 
@@ -222,5 +248,73 @@ exports.cancelGasRequest = async (req, res) => {
             message: "An error occurred while cancelling gas request.",
             error: error.message,
         });
+    }
+}
+
+// Create a new stock entry
+exports.createStock = async (req, res) => {
+    const { outletId, gasTypeId, quantity } = req.body;
+
+    if (!outletId || !gasTypeId || !quantity) {
+        return res.status(400).json({ message: "Outlet ID, Gas Type ID, and Quantity are required." });
+    }
+
+    try {
+        const stockId = await stockRepository.createStock(outletId);
+        await stockRepository.createStockDetail(stockId, gasTypeId, quantity);
+
+        res.status(201).json({ message: "Stock created successfully.", stockId });
+    } catch (error) {
+        console.error("Error creating stock:", error);
+        res.status(500).json({ message: "Failed to create stock.", error: error.message });
+    }
+}
+
+// Get all stocks with search and filter
+exports.getAllStocks = async (req, res) => {
+    const { query, gasTypeId } = req.query;
+
+    try {
+        const stocks = await stockRepository.getAllStocks(query, gasTypeId);
+        res.status(200).json(stocks);
+    } catch (error) {
+        console.error("Error fetching stocks:", error);
+        res.status(500).json({ message: "Failed to fetch stocks.", error: error.message });
+    }
+}
+
+// Update stock quantity
+exports.updateStock = async (req, res) => {
+    const { stockId, gasTypeId, quantity } = req.body;
+
+    if (!stockId || !gasTypeId || !quantity) {
+        return res.status(400).json({ message: "Stock ID, Gas Type ID, and Quantity are required." });
+    }
+
+    try {
+        await stockRepository.updateStockDetail(stockId, gasTypeId, quantity);
+        res.status(200).json({ message: "Stock updated successfully." });
+    } catch (error) {
+        console.error("Error updating stock:", error);
+        res.status(500).json({ message: "Failed to update stock.", error: error.message });
+    }
+}
+
+// Delete stock
+exports.deleteStock = async (req, res) => {
+    const { stockId } = req.params;
+
+    if (!stockId) {
+        return res.status(400).json({ message: "Stock ID is required." });
+    }
+
+    try {
+        await stockRepository.deleteStockDetails(stockId);
+        await stockRepository.deleteStock(stockId);
+
+        res.status(200).json({ message: "Stock deleted successfully." });
+    } catch (error) {
+        console.error("Error deleting stock:", error);
+        res.status(500).json({ message: "Failed to delete stock.", error: error.message });
     }
 }
