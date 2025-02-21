@@ -1,29 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, ArrowLeft, Plus, Edit, Trash } from 'lucide-react';
+import apiClient from '../../api/apiClient';
 
 const OutletManagement = () => {
     const navigate = useNavigate();
-
-    const users = [
-        { id: 1, name: 'GBG User', role: 'user' },
-        { id: 2, name: 'GBG Admin', role: 'admin' },
-        { id: 3, name: 'GBG Dispatch Admin', role: 'dispatch_admin' },
-        { id: 4, name: 'GBG Outlet Manager', role: 'outlet_manager' },
-        { id: 5, name: 'GBG Business', role: 'business' }
-    ];
-
-    const [outlets, setOutlets] = useState([
-        { id: 1, outlet_name: 'City Gas Outlet', address: '10 Station Road, Colombo', district: 'Colombo', phone: '0112777333', manager_id: 4 },
-        { id: 2, outlet_name: 'Suburban Gas Shop', address: '25 High Street, Dehiwala', district: 'Colombo', phone: '0112888444', manager_id: 4 },
-        { id: 3, outlet_name: 'Kandy Gas Depot', address: '5 Temple Road, Kandy', district: 'Kandy', phone: '0812999555', manager_id: 4 }
-    ]);
-
+    const [outlets, setOutlets] = useState([]);
+    const [managers, setManagers] = useState([]);
     const [selectedOutlet, setSelectedOutlet] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
     const [newOutlet, setNewOutlet] = useState({ outlet_name: '', address: '', district: '', phone: '', manager_id: '' });
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        fetchOutlets();
+        fetchManagers();
+    }, []);
+
+    const fetchOutlets = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await apiClient.get('/api/outlet', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setOutlets(response.data);
+        } catch (error) {
+            console.error('Error fetching outlets:', error);
+        }
+    };
+
+    const fetchManagers = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await apiClient.get('/api/outlet/outlets/managers', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setManagers(response.data);
+        } catch (error) {
+            console.error('Error fetching managers:', error);
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('user');
@@ -37,26 +54,22 @@ const OutletManagement = () => {
 
     const validateForm = () => {
         const { outlet_name, address, district, phone, manager_id } = newOutlet;
-    
-        // Validate outlet_name
+
         if (!outlet_name) {
             setError('Outlet Name is required.');
             return false;
         }
-    
-        // Validate address
+
         if (!address) {
             setError('Address is required.');
             return false;
         }
-    
-        // Validate district
+
         if (!district) {
             setError('District is required.');
             return false;
         }
-    
-        // Validate phone
+
         const phoneRegex = /^[0-9]{10}$/;
         if (!phone) {
             setError('Phone number is required.');
@@ -65,38 +78,57 @@ const OutletManagement = () => {
             setError('Phone number should be 10 digits.');
             return false;
         }
-    
-        // Validate manager_id
+
         if (!manager_id) {
             setError('Manager must be selected.');
             return false;
         }
-    
+
         setError('');
         return true;
     };
-    
 
-    const handleAddOutlet = () => {
+    const handleAddOutlet = async () => {
         if (!validateForm()) return;
 
-        setOutlets([...outlets, { id: outlets.length + 1, ...newOutlet }]);
-        setNewOutlet({ outlet_name: '', address: '', district: '', phone: '', manager_id: '' });
-        setIsModalOpen(false);
+        try {
+            const token = localStorage.getItem('token');
+            await apiClient.post('/api/outlet/add', newOutlet, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            fetchOutlets();
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error('Error adding outlet:', error);
+        }
     };
 
-    const handleEditOutlet = () => {
+    const handleEditOutlet = async () => {
         if (!validateForm()) return;
 
-        setOutlets(outlets.map((outlet) => (outlet.id === selectedOutlet.id ? newOutlet : outlet)));
-        setIsModalOpen(false);
-        setSelectedOutlet(null);
+        try {
+            const token = localStorage.getItem('token');
+            await apiClient.put(`/api/outlet/update/${selectedOutlet.id}`, newOutlet, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            fetchOutlets();
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error('Error updating outlet:', error);
+        }
     };
 
-    const handleDeleteOutlet = () => {
-        setOutlets(outlets.filter((outlet) => outlet.id !== selectedOutlet.id));
-        setIsDeleteConfirmationOpen(false);
-        setSelectedOutlet(null);
+    const handleDeleteOutlet = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await apiClient.delete(`/api/outlet/delete/${selectedOutlet.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            fetchOutlets();
+            setIsDeleteConfirmationOpen(false);
+        } catch (error) {
+            console.error('Error deleting outlet:', error);
+        }
     };
 
     const openModal = (outlet = null) => {
@@ -127,8 +159,7 @@ const OutletManagement = () => {
                         <div className="flex items-center space-x-4">
                             <button
                                 onClick={handleBackToDashboard}
-                                className="inline-flex items-center px-4 py-2 bg-blue-500/10 text-blue-400 
-                                    border border-blue-500/50 rounded-xl hover:bg-blue-500/20 transition-all duration-200"
+                                className="inline-flex items-center px-4 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/50 rounded-xl hover:bg-blue-500/20 transition-all duration-200"
                             >
                                 <ArrowLeft className="w-4 h-4 mr-2" />
                                 Back to Dashboard
@@ -137,8 +168,7 @@ const OutletManagement = () => {
                         <div className="flex items-center space-x-4">
                             <button
                                 onClick={handleLogout}
-                                className="inline-flex items-center px-4 py-2 bg-red-500/10 text-red-400 
-                                    border border-red-500/50 rounded-xl hover:bg-red-500/20 transition-all duration-200"
+                                className="inline-flex items-center px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/50 rounded-xl hover:bg-red-500/20 transition-all duration-200"
                             >
                                 <LogOut className="w-4 h-4 mr-2" />
                                 Logout
@@ -157,8 +187,7 @@ const OutletManagement = () => {
                         <div className="mb-6">
                             <button
                                 onClick={() => openModal()}
-                                className="inline-flex items-center px-4 py-2 bg-blue-500/10 text-blue-400 
-                                    border border-blue-500/50 rounded-xl hover:bg-blue-500/20 transition-all duration-200"
+                                className="inline-flex items-center px-4 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/50 rounded-xl hover:bg-blue-500/20 transition-all duration-200"
                             >
                                 <Plus className="w-4 h-4 mr-2" />
                                 Add Outlet
@@ -184,7 +213,7 @@ const OutletManagement = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{outlet.district}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{outlet.phone}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                                {users.find((user) => user.id === outlet.manager_id)?.name || 'N/A'}
+                                                {managers.find((manager) => manager.id === outlet.manager_id)?.name || 'N/A'}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <button
@@ -251,9 +280,9 @@ const OutletManagement = () => {
                                 className="w-full px-4 py-2 bg-gray-900/50 border border-gray-700/50 rounded-xl"
                             >
                                 <option value="">Select Manager</option>
-                                {users.map((user) => (
-                                    <option key={user.id} value={user.id}>
-                                        {user.name}
+                                {managers.map((manager) => (
+                                    <option key={manager.id} value={manager.id}>
+                                        {manager.name}
                                     </option>
                                 ))}
                             </select>

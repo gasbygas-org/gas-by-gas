@@ -110,3 +110,14 @@ exports.getAllOutletsWithManager = async (req, res) => {
         });
     }
 };
+
+// Get outlet managers
+exports.getOutletManagers = async (req, res) => {
+    try {
+        const managers = await outletRepository.getOutletManagers();
+        res.status(200).json(managers);
+    } catch (error) {
+        console.error("Error fetching outlet managers:", error);
+        res.status(500).json({ message: "Failed to fetch outlet managers.", error: error.message });
+    }
+}

@@ -5,7 +5,8 @@ const {
     getOutletById,
     deleteOutlet,
     getAllOutlets,
-    getAllOutletsWithManager
+    getAllOutletsWithManager,
+    getOutletManagers,
 } = require('../controllers/outletController');
 const verifyToken = require('../middlewares/authMiddleware')
 
@@ -27,5 +28,8 @@ router.get('/:id', verifyToken, getOutletById);
 router.delete('/delete/:id', verifyToken, deleteOutlet);
 
 router.get('/outlets/with-managers', getAllOutletsWithManager);
+
+// Get outlet managers
+router.get("/outlets/managers", verifyToken, getOutletManagers);
 
 module.exports = router;
