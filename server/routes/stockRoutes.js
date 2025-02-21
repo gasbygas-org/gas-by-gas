@@ -1,15 +1,18 @@
 const express = require('express');
-const { requestGasCylinder} = require('../controllers/stockController');
-const {filterGasRequest} = require('../controllers/stockController');
-const {approveGasRequest} = require('../controllers/stockController');
-const {updateGasRequestAndStock} = require('../controllers/stockController');
+const { requestGasCylinder } = require('../controllers/stockController');
+const { filterGasRequest } = require('../controllers/stockController');
+const { approveGasRequest } = require('../controllers/stockController');
+const {
+    updateGasRequestAndStock,
+    cancelGasRequest,
+} = require('../controllers/stockController');
 const verifyToken = require('../middlewares/authMiddleware')
-const {app} = require("firebase-admin");
+const { app } = require("firebase-admin");
 
 const router = express.Router();
 
 // Add gas request
-router.post('/request/gas', verifyToken,requestGasCylinder);
+router.post('/request/gas', verifyToken, requestGasCylinder);
 
 //filter gas requests
 router.get('/request/filter-gas-requests', verifyToken, filterGasRequest);
@@ -19,5 +22,7 @@ router.patch('/request/status', verifyToken, approveGasRequest);
 
 // Update gas request status and stock
 router.patch('/request/:requestId/status', verifyToken, updateGasRequestAndStock);
+
+router.patch('/request/:requestId/cancel', verifyToken, cancelGasRequest);
 
 module.exports = router;

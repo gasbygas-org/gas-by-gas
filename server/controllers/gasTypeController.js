@@ -15,3 +15,16 @@ exports.getGasTypes = async (req, res) => {
         });
     }
 };
+
+exports.getAllGasTypes = async (req, res) => {
+    try {
+        const gasTypes = await gasTypeRepository.getAllGasTypes();
+        res.status(200).json(gasTypes);
+    } catch (error) {
+        console.error('Error fetching gas types:', error);
+        res.status(500).json({
+            message: 'Failed to fetch gas types',
+            error: error.message
+        });
+    }
+};

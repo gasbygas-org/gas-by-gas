@@ -39,6 +39,7 @@ const GasRequests = () => {
             setGasRequests(response.data.data);
             setTotalPages(pagination.totalPages);
         } catch (error) {
+            console.log(error);
             setError('Failed to fetch gas requests. Please try again later.');
         } finally {
             setIsLoading(false);
@@ -60,6 +61,7 @@ const GasRequests = () => {
                 });
             await fetchGasRequests(1); // refresh the list after cancellation
         } catch (error) {
+            console.log(error);
             setError('Failed to cancel gas request. Please try again later.');
         } finally {
             setIsLoading(false);

@@ -1,6 +1,6 @@
 const StockRepository = require("../repositories/stockRepository");
 const db = require("../config/db");
-const {createTransport} = require("nodemailer");
+const { createTransport } = require("nodemailer");
 
 const stockRepository = new StockRepository(db);
 
@@ -13,16 +13,17 @@ const transporter = createTransport({
 });
 
 exports.requestGasCylinder = async (req, res) => {
-    const { outletId, requestStatus = "InProgress", deliveryDate, gasTypeId, quantity } = req.body;
+    const { outletId, requestStatus = "Pending", deliveryDate, gasTypeId, quantity } = req.body;
 
     // Validate the input
-    if (!outletId || !deliveryDate || !gasTypeId || !quantity) {
-        return res.status(400).json({ message: "Invalid request data. Please provide outletId, deliveryDate, gasTypeId, and quantity." });
+    if (!outletId/* || !deliveryDate*/ || !gasTypeId || !quantity) {
+        // return res.status(400).json({ message: "Invalid request data. Please provide outletId, deliveryDate, gasTypeId, and quantity." });
+        return res.status(400).json({ message: "Invalid request data. Please provide outletId, gasTypeId, and quantity." });
     }
 
     try {
         // Insert into outlet_request table
-        const outletRequestId = await stockRepository.createOutletRequest(outletId, requestStatus, deliveryDate);
+        const outletRequestId = await stockRepository.createOutletRequest(outletId, requestStatus/*, deliveryDate*/);
 
         // Insert into outlet_request_details table
         await stockRepository.createOutletRequestDetail(outletRequestId, gasTypeId, quantity);
@@ -44,14 +45,15 @@ exports.filterGasRequest = async (req, res) => {
     const { outletId, status } = req.query;
     const { page = 1, limit = 10 } = req.query;
 
-    if (!outletId || !status) {
-        return res.status(400).json({ message: "Outlet ID and status are required." });
+    if (!outletId/* || !status*/) {
+        return res.status(400).json({ message: "Outlet ID is required." }); // Outlet ID and status are required.
     }
 
     try {
         const offset = (page - 1) * limit;
 
         const { results, totalCount } = await stockRepository.filterGasRequests(outletId, status, offset, parseInt(limit));
+        // console.log(results);        
 
         const totalPages = Math.ceil(totalCount / limit);
 
@@ -93,7 +95,7 @@ exports.approveGasRequest = async (req, res) => {
 
             await stockRepository.reduceHeadOfficeStock(gasTypeId, gasAmount);
 
-            const deliveryId = await stockRepository.createDelivery(outletId,requestId, "Scheduled");
+            const deliveryId = await stockRepository.createDelivery(outletId, requestId, "Scheduled");
 
             await stockRepository.createDeliveryDetail(deliveryId, gasTypeId, gasAmount);
 
@@ -164,8 +166,8 @@ exports.updateGasRequestAndStock = async (req, res) => {
         if (requestStatus === "Delivered") {
             await stockRepository.updateRequestStatus(requestId, requestStatus);
 
-              // Update delivery status to 'Delivered'
-              await stockRepository.updateDeliveryStatus(requestId, "Delivered");
+            // Update delivery status to 'Delivered'
+            await stockRepository.updateDeliveryStatus(requestId, "Delivered");
 
             // Check if stock exists for the outlet
             let stock = await stockRepository.getStockByOutletId(outletId);
@@ -200,5 +202,25 @@ exports.updateGasRequestAndStock = async (req, res) => {
     }
 };
 
+exports.cancelGasRequest = async (req, res) => {
+    const { requestId } = req.params;
+    // const { requestStatus } = req.body;
+    const requestStatus = 'Cancelled';
 
+    if (!requestId) {
+        return res.status(400).json({ message: "Invalid request. Provide requestId." });
+    }
 
+    try {
+        await stockRepository.updateRequestStatus(requestId, requestStatus);
+        return res.status(200).json({
+            message: `Gas request status updated to ${requestStatus} successfully.`,
+        });
+    } catch (error) {
+        console.error("Error cancelling gas request:", error);
+        res.status(500).json({
+            message: "An error occurred while cancelling gas request.",
+            error: error.message,
+        });
+    }
+}
