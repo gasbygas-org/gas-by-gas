@@ -72,6 +72,32 @@ exports.filterGasRequest = async (req, res) => {
     }
 };
 
+exports.getAllGasRequests = async (req, res) => {
+    const { query, status } = req.query;
+    const { page = 1, limit = 10 } = req.query;
+
+    try {
+        const offset = (page - 1) * limit;
+
+        const { results, totalCount } = await stockRepository.getAllGasRequests(query, status, offset, parseInt(limit));
+
+        const totalPages = Math.ceil(totalCount / limit);
+
+        res.status(200).json({
+            currentPage: parseInt(page),
+            totalPages,
+            totalRequests: totalCount,
+            gasRequests: results,
+        });
+    } catch (error) {
+        console.error("Error filtering gas requests:", error);
+        res.status(500).json({
+            message: "Failed to fetch gas requests.",
+            error: error.message,
+        });
+    }
+};
+
 exports.approveGasRequest = async (req, res) => {
     const { outletId, requestId, gasAmount, status } = req.body;
 

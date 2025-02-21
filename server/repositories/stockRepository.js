@@ -64,6 +64,74 @@ class StockRepository {
 
         return { results, totalCount };
     }
+
+    async getAllGasRequests(query, status, offset, limit) {
+        const filters = [];
+        const params = [];
+
+        if (query) {
+            filters.push("(o.outlet_name LIKE ? OR o.address LIKE ? OR o.district LIKE ?)");
+            params.push(`%${query}%`, `%${query}%`, `%${query}%`);
+        }
+
+        if (status) {
+            filters.push("or.request_status = ?");
+            params.push(status);
+        }
+
+        const whereClause = filters.length > 0 ? `WHERE ${filters.join(" AND ")}` : "";
+
+        const queryStatement = `
+            SELECT 
+                \`or\`.id AS id,
+                \`or\`.outlet_id,
+                CONCAT(o.outlet_name, ', ', o.address, ' (', o.district, ')') AS outlet,
+                \`or\`.request_status,
+                \`or\`.delivery_date,
+                ord.gas_type_id,
+                COALESCE(
+                    (SELECT dd.quantity 
+                     FROM deliveries d 
+                     INNER JOIN delivery_details dd ON d.id = dd.delivery_id 
+                     WHERE d.outlet_request_id = \`or\`.id AND dd.gas_type_id = ord.gas_type_id 
+                     LIMIT 1), 
+                    ord.quantity
+                ) AS quantity,
+                gt.gas_type_name AS gas_type,
+                DATE_FORMAT(\`or\`.created_at, '%Y-%m-%d %H:%i:%s') AS created_at,
+                DATE_FORMAT(\`or\`.updated_at, '%Y-%m-%d %H:%i:%s') AS updated_at
+            FROM outlet_requests AS \`or\`
+            INNER JOIN outlet_request_details AS ord
+                ON \`or\`.id = ord.outlet_request_id
+            INNER JOIN outlets AS o
+                ON \`or\`.outlet_id = o.id
+            INNER JOIN gas_types AS gt
+                ON gt.id = ord.gas_type_id
+            ${whereClause}
+            ORDER BY \`or\`.id DESC
+            LIMIT ? OFFSET ?;
+        `;
+
+        const countQuery = `
+            SELECT COUNT(*) AS totalCount
+            FROM outlet_requests AS \`or\`
+            INNER JOIN outlet_request_details AS ord
+                ON \`or\`.id = ord.outlet_request_id
+            INNER JOIN outlets AS o
+                ON \`or\`.outlet_id = o.id
+            INNER JOIN gas_types AS gt
+                ON gt.id = ord.gas_type_id
+            ${whereClause};
+        `;
+
+        params.push(limit, offset);
+
+        const [results] = await this.db.query(queryStatement, params);
+        const [[{ totalCount }]] = await this.db.query(countQuery, params.slice(0, -2));
+
+        return { results, totalCount };
+    }
+
     async updateGasRequestStatus(requestId, status) {
         const query = `
             UPDATE outlet_requests
@@ -164,7 +232,7 @@ class StockRepository {
     }
     async createDelivery(outletId, requestId, status) {
         const [result] = await this.db.query(
-            `INSERT INTO deliveries (outlet_id, request_id, delivery_date, status) VALUES (?, ?, CURDATE(), ?)`,
+            `INSERT INTO deliveries (outlet_id, outlet_request_id, delivery_date, status) VALUES (?, ?, CURDATE(), ?)`,
             [outletId, requestId, status]
         );
         return result.insertId;
