@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogOut, Package, Mail, User } from 'lucide-react';
+import { LogOut, Package, Mail, User,FileText } from 'lucide-react';
 import apiClient from '../../api/apiClient';
 
 const UserDashboard = () => {
@@ -105,56 +105,83 @@ const UserDashboard = () => {
                 </nav>
 
                 <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {/* Overview Statistics Section */}
-                    <div className="backdrop-blur-xl bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50 mb-8">
-                        <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
-                            Overview Statistics
-                        </h2>
-                        <div className="flex justify-center items-center gap-8">
-                            {/* Gas Requests Box */}
-                            <div className="flex items-center justify-center bg-blue-100 text-blue-500 rounded-xl px-8 py-6 text-2xl shadow-xl">
-                                <Package className="w-6 h-6 mr-3 text-blue-400" />
-                                <span>
-                                    Gas Requests: {isLoading ? 'Loading...' : error ? error : gasRequestCount}
-                                </span>
-                            </div>
-
-                            {/* Notifications Box
-                            <div className="flex items-center justify-center bg-purple-100 text-purple-500 rounded-xl px-8 py-6 text-2xl shadow-xl">
-                                <Mail className="w-6 h-6 mr-3 text-purple-400" />
-                                <span>Notifications: {notifications.length}</span>
-                            </div> */}
+                     {/* Overview Statistics */}
+            <div className="backdrop-blur-xl bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50 mb-8">
+                <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
+                    Overview Statistics
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Gas Requests */}
+                    <div className="bg-blue-500/20 p-6 rounded-xl shadow-xl border border-blue-500/50 hover:bg-blue-500/30 transition-colors duration-200">
+                        <div className="flex items-center justify-between">
+                            <Package className="w-8 h-8 text-blue-400" />
+                            <span className="text-lg font-semibold text-gray-300">Gas Requests</span>
                         </div>
+                        <div className="mt-4 text-4xl font-bold text-gray-100">
+                            {isLoading ? 'Loading...' : error ? error : gasRequestCount}
+                        </div>
+                        <p className="text-sm text-gray-400 mt-2">Total gas requests made by you.</p>
                     </div>
 
-                    {/* Quick Links Section */}
-                    <div className="backdrop-blur-xl bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50">
-                        <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
-                            Quick Links
-                        </h2>
-                        <ul className="space-y-4">
-                            <li>
-                                <a href="/user/request-gas" className="text-blue-400 hover:text-blue-300 transition-colors duration-200">
-                                    Request Gas
-                                </a>
-                            </li>
-                            <li>
-                                <a href="/user/gas-requests" className="text-blue-400 hover:text-blue-300 transition-colors duration-200">
-                                    Gas Requests
-                                </a>
-                            </li>
-                            <li>
-                                <a href="/user/notifications" className="text-blue-400 hover:text-blue-300 transition-colors duration-200">
-                                    Notifications
-                                </a>
-                            </li>
-                            <li>
-                                <a href="/user/reports" className="text-blue-400 hover:text-blue-300 transition-colors duration-200">
-                                    Reports
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+                    {/* Notifications
+                    <div className="bg-purple-500/20 p-6 rounded-xl shadow-xl border border-purple-500/50 hover:bg-purple-500/30 transition-colors duration-200">
+                        <div className="flex items-center justify-between">
+                            <Mail className="w-8 h-8 text-purple-400" />
+                            <span className="text-lg font-semibold text-gray-300">Notifications</span>
+                        </div>
+                        <div className="mt-4 text-4xl font-bold text-gray-100">
+                            {notifications.length}
+                        </div>
+                        <p className="text-sm text-gray-400 mt-2">Total notifications for your requests.</p>
+                    </div> */}
+
+            
+                </div>
+             </div>
+
+             <div className="backdrop-blur-xl bg-gray-800/30 p-8 rounded-3xl shadow-2xl border border-gray-700/50">
+    <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
+        Quick Links
+    </h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Request Gas Link */}
+        <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg border border-gray-700/50 hover:bg-gray-700 transition-colors duration-200">
+            <Link to="/user/request-gas" className="flex flex-col items-center">
+                <Package className="w-8 h-8 mb-4 text-blue-500" />
+                <h3 className="text-xl font-semibold text-gray-300 text-center">Request Gas</h3>
+                <p className="text-gray-400 text-center mt-2">Request gas for your needs.</p>
+            </Link>
+        </div>
+
+        {/* Gas Requests Link */}
+        <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg border border-gray-700/50 hover:bg-gray-700 transition-colors duration-200">
+            <Link to="/user/gas-requests" className="flex flex-col items-center">
+                <Package className="w-8 h-8 mb-4 text-blue-500" />
+                <h3 className="text-xl font-semibold text-gray-300 text-center">Gas Requests</h3>
+                <p className="text-gray-400 text-center mt-2">View and manage your gas requests.</p>
+            </Link>
+        </div>
+
+        {/* Notifications Link
+        <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg border border-gray-700/50 hover:bg-gray-700 transition-colors duration-200">
+            <Link to="/user/notifications" className="flex flex-col items-center">
+                <Mail className="w-8 h-8 mb-4 text-blue-500" />
+                <h3 className="text-xl font-semibold text-gray-300 text-center">Notifications</h3>
+                <p className="text-gray-400 text-center mt-2">View your recent notifications.</p>
+            </Link>
+        </div> */}
+
+        {/* Reports Link */}
+        <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg border border-gray-700/50 hover:bg-gray-700 transition-colors duration-200">
+            <Link to="/user/reports" className="flex flex-col items-center">
+                <FileText className="w-8 h-8 mb-4 text-blue-500" />
+                <h3 className="text-xl font-semibold text-gray-300 text-center">Reports</h3>
+                <p className="text-gray-400 text-center mt-2">Generate and download reports.</p>
+            </Link>
+        </div>
+    </div>
+</div>
+
                 </main>
             </div>
 
